@@ -1,26 +1,35 @@
-package Drone
+package drone
 public
 	with Base_Types;
 	with Data_Model;
 	
 system Drone
-	features
-		current_location: out data port;
-		status_change: out event port;
-		new_target: in event data port;
+	--features
+		--current_location: out data port;
+		--status_change: out event port;
+		--new_target: in event data port;
 end Drone;
 
+system Operator
+	features
+		new_target: out event data port;
+		current_location: in data port;
+		status_change: in event port;
+end Operator;
 
 
-System implementation Drone.impl
+system implementation Drone.impl
 	subcomponents
 		the_GPS: device GPS;
 		the_weight_sensor: device WeightSensor;
 		the_height_sensor: device HeightSensor;
 		the_radar: device Radar;
 		the_aerial: device Aerial;
-		the_controller: process Controller.impl;
+		the_drone_rotor: device DroneRotor;
+		the_operator: system Operator;
+		the_controller: process Controller.with_threads;
 		the_bus: bus HWConnection.impl;
+		the_ram: memory Ram;
 		the_processor: processor MainProcessor.impl;
 	connections
 		c1: port the_weight_sensor.weight -> the_controller.weight;
@@ -30,9 +39,18 @@ System implementation Drone.impl
 		c6: port the_radar.blockade -> the_controller.blockade;
 		c3: port the_controller.location_out -> the_aerial.location_out;
 		c7: port the_controller.status_change -> the_aerial.status_change;
-		c8: port new_target -> the_aerial.new_target_copy;
-		c9: port the_aerial.current_location -> current_location;
-		c10: port the_aerial.status_change_copy -> status_change;
+		c8: port the_operator.new_target -> the_aerial.new_target_copy;
+		c9: port the_aerial.current_location -> the_operator.current_location;
+		c10: port the_aerial.status_change_copy -> the_operator.status_change;
+		
+		c21: bus access the_bus -> the_GPS.bus_access;
+		c22: bus access the_bus -> the_weight_sensor.bus_access;
+		c23: bus access the_bus -> the_height_sensor.bus_access;
+		c24: bus access the_bus -> the_aerial.bus_access;
+		c25: bus access the_bus -> the_radar.bus_access;
+		c26: bus access the_bus -> the_ram.bus_access;
+		c27: bus access the_bus -> the_processor.bus_access;
+		c28: bus access the_bus -> the_drone_rotor.bus_access;
 end Drone.impl;
 
 process Controller
@@ -46,12 +64,24 @@ process Controller
 		new_target: in event data port;
 end Controller;
 
-process implementation Controller.impl
-end Controller.impl;
+process implementation Controller.with_threads
+	subcomponents
+		thread_weight: thread ReadWeight.impl;
+		thread_height: thread ReadHeight.impl;
+		thread_rotor: thread RotorPower.impl;
+		thread_radar: thread ScanArea.impl;
+		thread_gps: thread GPSData.impl; 
+		thread_analyse_data: thread AnalyseData.impl;
+end Controller.with_threads;
+
+-- --------------------
+--      Devices      --
+-- --------------------
 
 device GPS
 	features
 		location_in: out data port;
+		bus_access: requires bus access HWConnection;
 end GPS;
 	
 device implementation GPS.impl
@@ -61,6 +91,7 @@ end GPS.impl;
 device WeightSensor	
 	features
 		weight: out data port Base_Types::Float;
+		bus_access: requires bus access HWConnection;
 end WeightSensor;
 	
 device implementation WeightSensor.impl
@@ -70,6 +101,7 @@ end WeightSensor.impl;
 device HeightSensor	
 	features
 		height: out data port Base_Types::Float;
+		bus_access: requires bus access HWConnection;
 end HeightSensor;
 	
 device implementation HeightSensor.impl
@@ -79,11 +111,11 @@ end HeightSensor.impl;
 device Radar	
 	features
 		blockade: out event data port;
+		bus_access: requires bus access HWConnection;
 end Radar;
 	
 device implementation Radar.impl
 end Radar.impl;
-
 
 device Aerial
 	features
@@ -99,12 +131,20 @@ end Aerial;
 device implementation Aerial.impl
 end Aerial.impl;
 
+device DroneRotor
+  features
+    rotor_power_in : in data port;
+    bus_access : requires bus access HWConnection;
+end DroneRotor;
+
+device implementation DroneRotor.impl
+end DroneRotor.impl;
+
 bus HWConnection
 end HWConnection;
 	
 bus implementation HWConnection.impl
 end HWConnection.impl;
-
 
 processor MainProcessor
 	features
@@ -112,12 +152,73 @@ processor MainProcessor
 end MainProcessor;
 	
 processor implementation MainProcessor.impl
-	subcomponents 
-		ram_memory: memory Ram;
 end MainProcessor.impl;
 
 memory Ram
+	features
+		bus_access: requires bus access HWConnection.impl;
 end Ram;
-	
-end Drone;
+
+-- --------------------
+--      Threads      --
+-- --------------------
+
+thread ReadWeight
+	features
+		weight_in: in data port;
+		weight_out: out data port;
+end ReadWeight;
+
+thread implementation ReadWeight.impl
+end ReadWeight.impl;
+
+thread ReadHeight
+	features
+		height_in: in data port;
+		height_out: out data port;
+end ReadHeight;
+
+thread implementation ReadHeight.impl
+end ReadHeight.impl;
+
+thread RotorPower
+	features
+		rotor_power_in: in data port;
+		rotor_power_out: out data port;	
+end RotorPower;
+
+thread implementation RotorPower.impl
+end RotorPower.impl;
+
+thread ScanArea
+	features
+		area_in: in event port;
+		area_out: out event port;
+end ScanArea;
+
+thread implementation ScanArea.impl
+end ScanArea.impl;
+
+thread GPSData
+	features
+		gps_in: in data port;
+		gps_out: out data port;
+end GPSData;
+
+thread implementation GPSData.impl
+end GPSData.impl;
+
+thread AnalyseData
+	features
+		gps_in: in data port;
+		area_in: in event port;
+		height_in: in data port;
+		weight_in: in data port;
+		rotor_power_out: out data port; 
+end AnalyseData;
+
+thread implementation AnalyseData.impl
+end AnalyseData.impl;
+
+end drone;
 

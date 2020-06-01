@@ -1,4 +1,4 @@
-package drone
+package drone2
 public
 
 with Drone_Common;
@@ -250,4 +250,4 @@ end transmitter.impl;
 
 
 
-end drone;
+end drone2;

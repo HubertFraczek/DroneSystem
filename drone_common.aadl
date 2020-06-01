@@ -42,7 +42,7 @@ DEVICE antenna
     Period => 1ms;
   END operator;
   
-  DEVICE GPS
+  device GPS
   	features
   		location : OUT DATA PORT Drone_Types::Drone_Flight_Parameter;
   		mem_bus : REQUIRES BUS ACCESS mem_bus;
