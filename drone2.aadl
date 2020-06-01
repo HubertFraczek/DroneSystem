@@ -1,71 +1,92 @@
-PACKAGE drone_v1
-PUBLIC
+package drone
+public
 
-WITH Drone_Common;
-WITH Drone_Types;
--- Drone System
+with Drone_Common;
+with Drone_Types;
+-- Drone system
 
-SYSTEM drone
-END drone;
+	system drone
+	end drone;
 
--- System implementation is composed by physical devices (Hardware
+-- system implementation is composed by physical devices (Hardware
 -- entity): antenna + processor + memory + bus and software entity :
 -- running processes and threads + operating system functionalities
 -- (scheduling) implemented in the processor that represent a part
 -- of execution platform and physical devices in the same time.
-SYSTEM IMPLEMENTATION drone.v1
-SUBCOMPONENTS
-  aerial : DEVICE drone_common::antenna;
-  drone_rotor : DEVICE drone_common::drone_rotor;
-  operator : DEVICE drone_common::operator;
-  GPS : DEVICE drone_common::GPS;
-  weight_sensor : DEVICE drone_common::weight_sensor;
-  height_sensor : DEVICE drone_common::height_sensor;
-  radar : DEVICE drone_common::radar;
-  cpu : PROCESSOR drone_common::cpu_leon2;
-  mem_bus : BUS drone_common::mem_bus;
-  RAM : MEMORY drone_common::RAM;
-  controller : PROCESS processing.others;
-CONNECTIONS
-  cnx1 : PORT controller.location_out -> aerial.location_in;
-  cnx2 : PORT aerial.new_target -> controller.new_target;
-  cnx3 : PORT controller.send_pulse -> aerial.antenna_in;
-  cnx4 : PORT controller.to_screen -> monitor.screen_in;
-  cnx5 : BUS ACCESS mem_bus -> aerial.mem_bus;
-  cnx6 : BUS ACCESS mem_bus -> radar.mem_bus;
-  cnx7 : BUS ACCESS mem_bus -> drone_rotor.mem_bus;
-  cnx8 : BUS ACCESS mem_bus -> GPS.mem_bus;
-  cnx9 : BUS ACCESS mem_bus -> weight_sensor.mem_bus;
-  cnx10 : BUS ACCESS mem_bus -> height_sensor.mem_bus;
-  
-  cnx11 : BUS ACCESS mem_bus -> cpu.mem_bus;
-  cnx12 : BUS ACCESS mem_bus -> RAM.mem_bus;
-PROPERTIES
-	Actual_Processor_Binding => (REFERENCE(cpu)) APPLIES TO controller;
- 	Actual_Memory_Binding => (REFERENCE(ram)) APPLIES TO controller;
-  	Actual_Connection_Binding => (REFERENCE(mem_bus)) APPLIES TO cnx1, cnx2, cnx3, cnx4;
-END drone.v1;
+	system implementation drone.with_devices
+	subcomponents
+	  aerial : device drone_common::antenna;
+	  drone_rotor : device drone_common::drone_rotor;
+	  operator : device drone_common::operator;
+	  GPS : device drone_common::GPS;
+	  weight_sensor : device drone_common::weight_sensor;
+	  height_sensor : device drone_common::height_sensor;
+	  radar : device drone_common::radar;
+	  cpu : processor drone_common::cpu_leon2;
+	  mem_bus : bus drone_common::mem_bus;
+	  RAM : memory drone_common::RAM;
+	  controller : process Controller.with_threads;
+	connections
+	  cnx1 : PORT controller.location_out -> aerial.location_in;
+	  cnx2 : PORT aerial.new_target -> controller.new_target;
+	  cnx3 : PORT controller.send_pulse -> aerial.antenna_in;
+	  cnx4 : PORT controller.to_screen -> monitor.screen_in;
+	  cnx5 : bus access mem_bus -> aerial.mem_bus;
+	  cnx6 : bus access mem_bus -> radar.mem_bus;
+	  cnx7 : bus access mem_bus -> drone_rotor.mem_bus;
+	  cnx8 : bus access mem_bus -> GPS.mem_bus;
+	  cnx9 : bus access mem_bus -> weight_sensor.mem_bus;
+	  cnx10 : bus access mem_bus -> height_sensor.mem_bus;
+	  
+	  cnx11 : bus access mem_bus -> cpu.mem_bus;
+	  cnx12 : bus access mem_bus -> RAM.mem_bus;
+	properties
+		Actual_processor_Binding => (reference(cpu)) applies to controller;
+	 	Actual_Memory_Binding => (reference(ram)) applies to controller;
+	  	Actual_Connection_Binding => (reference(mem_bus)) applies to cnx1, cnx2, cnx3, cnx4;
+	end drone.with_devices;
+
+
+-- ---------------------
+--  Controller process with threads --
+-- ---------------------
+
+process controller
+features
+		weight: in data port Drone_Types::Drone_Flight_Parameter;
+		location_in: in data port;
+		height: in data port Drone_Types::Drone_Flight_Parameter;
+		location_out: out data port;
+		status_change: out event port;
+		blockade: in event data port;
+		new_target: in event data port;
+end controller;
+
+process implementation Controller.with_threads
+	
+end Controller.with_threads;
+
 
 -- The controller process is responsible for signals processing :
 -- Pattern:
 --    transmitter -> antenna -> receiver -> analyser -> display
 
-PROCESS processing
-FEATURES
+process processing
+features
   to_screen : OUT EVENT PORT;
   send_pulse : OUT EVENT PORT;
   receive_pulse : IN DATA PORT Radar_Types::Target_Distance;
   get_angle : IN DATA PORT Radar_Types::Motor_Position;
-END processing;
+end processing;
 
-PROCESS IMPLEMENTATION processing.others
-SUBCOMPONENTS
-  receive : THREAD receiver.impl;
-  analyse : THREAD analyser.impl;
-  display : THREAD display_panel.impl;
-  transmit : THREAD transmitter.impl;
-  control_angle : THREAD controller.impl;
-CONNECTIONS
+process implementation processing.others
+subcomponents
+  receive : thread receiver.impl;
+  analyse : thread analyser.impl;
+  display : thread display_panel.impl;
+  transmit : thread transmitter.impl;
+  control_angle : thread controller.impl;
+connections
   cnx1 : PORT receive_pulse -> receive.receiver_in;
   cnx2 : PORT display.display_out -> to_screen;
   cnx3 : PORT transmit.transmitter_out -> send_pulse;
@@ -74,39 +95,39 @@ CONNECTIONS
   cnx6 : PORT analyse.analyser_out -> display.display_in;
   cnx7 : PORT transmit.transmitter_out -> analyse.from_transmitter;
   cnx8 : PORT control_angle.controller_out -> analyse.from_controller;
-END processing.others;
+end processing.others;
 
 -- --------------------
---  Receiver Thread --
+--  Receiver thread --
 -- --------------------
 -- 
 -- This thread receives radar echos from the antenna.
 
-THREAD receiver
-FEATURES
+thread receiver
+features
   receiver_in : IN DATA PORT Radar_Types::Target_Distance;
   receiver_out : OUT DATA PORT Radar_Types::Target_Distance;
-END receiver;
+end receiver;
 
-THREAD IMPLEMENTATION receiver.impl
+thread implementation receiver.impl
 CALLS default: {
-  RS : SUBPROGRAM Receiver_Spg;
+  RS : subprogram Receiver_Spg;
 };
-CONNECTIONS
+connections
   cnx1 : PARAMETER receiver_in -> RS.receiver_in;
   cnx2 : PARAMETER RS.receiver_out -> receiver_out;
-PROPERTIES
+properties
   Dispatch_Protocol => Periodic;
   Priority => 13;
   Compute_Execution_Time => 10ms..20ms;
   Period => 1500ms;
-END receiver.impl;
+end receiver.impl;
 
-SUBPROGRAM Receiver_Spg
-FEATURES
+subprogram Receiver_Spg
+features
   receiver_in : IN PARAMETER Radar_Types::Target_Distance;
   receiver_out : OUT PARAMETER Radar_Types::Target_Distance;
-PROPERTIES
+properties
   Source_Language => (Ada95);
   Source_Name => "radar.receiver";
 ANNEX Behavior_Specification {**
@@ -115,7 +136,7 @@ ANNEX Behavior_Specification {**
   TRANSITIONS
     t : s -[ ]-> s { receiver_out := "echo" };
 **};
-END Receiver_Spg;
+end Receiver_Spg;
 
 -- ---------------------
 --   Analyser thread --
@@ -124,35 +145,35 @@ END Receiver_Spg;
 -- This thread compares transmitted and received signals to perform
 -- detection, localisation and identification.
 
-THREAD analyser
-FEATURES
+thread analyser
+features
   from_transmitter : IN DATA PORT radar_types::Radar_Pulse;
   analyser_out : OUT DATA PORT radar_types::Target_Position;
   from_receiver : IN DATA PORT Radar_Types::Target_Distance;
   from_controller : IN DATA PORT Radar_Types::Motor_Position;
-END analyser;
+end analyser;
 
-THREAD IMPLEMENTATION analyser.impl
+thread implementation analyser.impl
 CALLS default: {
-  AS : SUBPROGRAM Analyser_Spg;
+  AS : subprogram Analyser_Spg;
 };
-CONNECTIONS
+connections
   cnx1 : PARAMETER AS.analyser_out -> analyser_out;
   cnx2 : PARAMETER from_receiver -> AS.from_receiver;
   cnx3 : PARAMETER from_controller -> AS.from_controller;
-PROPERTIES
+properties
   Dispatch_Protocol => Periodic;
   Priority => 12;
   Compute_Execution_Time => 40ms..60ms;
   Period => 5000ms;
-END analyser.impl;
+end analyser.impl;
 
-SUBPROGRAM Analyser_Spg
-FEATURES
+subprogram Analyser_Spg
+features
   analyser_out : OUT PARAMETER radar_types::Target_Position;
   from_receiver : IN PARAMETER Radar_Types::Target_Distance;
   from_controller : IN PARAMETER Radar_Types::Motor_Position;
-PROPERTIES
+properties
   Source_Language => (Ada95);
   Source_Name => "radar.analyser";
 ANNEX Behavior_Specification {**
@@ -161,7 +182,7 @@ ANNEX Behavior_Specification {**
   TRANSITIONS
     t : s -[ ]-> s { analyser_out := "distance" };
 **};
-END Analyser_Spg;
+end Analyser_Spg;
 
 -- -------------------------
 --   Display_Panel thread --
@@ -170,29 +191,29 @@ END Analyser_Spg;
 -- This thread is responsible for formatting and displaying
 -- processed signals
 
-THREAD display_panel
-FEATURES
+thread display_panel
+features
   display_out : OUT EVENT PORT;
   display_in : IN DATA PORT radar_types::Target_Position;
-END display_panel;
+end display_panel;
 
-THREAD IMPLEMENTATION display_panel.impl
+thread implementation display_panel.impl
 CALLS default: {
-  DS : SUBPROGRAM Display_Spg;
+  DS : subprogram Display_Spg;
 };
-CONNECTIONS
+connections
   cnx1 : PARAMETER display_in -> DS.display_in;
-PROPERTIES
+properties
   Dispatch_Protocol => Periodic;
   Priority => 10;
   Compute_Execution_Time => 10ms..30ms;
   Period => 2000ms;
-END display_panel.impl;
+end display_panel.impl;
 
-SUBPROGRAM Display_Spg
-FEATURES
+subprogram Display_Spg
+features
   display_in : IN PARAMETER radar_types::Target_Position; 
-PROPERTIES
+properties
   Source_Language => (Ada95);
   Source_Name => "radar.display_panel";
 ANNEX Behavior_Specification {**
@@ -201,19 +222,19 @@ ANNEX Behavior_Specification {**
   TRANSITIONS
     t : s -[ ]-> s { display_out! };
 **};
-END Display_Spg;
+end Display_Spg;
 
 -- ----------------------
 --  Transmitter thread --
 -- -----------------------
 
-THREAD transmitter
-FEATURES
+thread transmitter
+features
   transmitter_out : OUT DATA PORT radar_types::Radar_Pulse;
-END transmitter;
+end transmitter;
 
-THREAD IMPLEMENTATION transmitter.impl
-PROPERTIES
+thread implementation transmitter.impl
+properties
   Dispatch_Protocol => Periodic;
   Priority => 21;
   Compute_Execution_Time => 10ms..10ms;
@@ -225,50 +246,8 @@ ANNEX Behavior_Specification {**
   TRANSITIONS
     t : s -[ON DISPATCH]-> s { transmitter_out := "ping" };
 **};
-END transmitter.impl;
+end transmitter.impl;
 
--- ---------------------
---  Controller thread --
--- ---------------------
 
-THREAD controller
-features
-		weight: in data port Drone_Types::Drone_Flight_Parameter;
-		location_in: in data port;
-		height: in data port Drone_Types::Drone_Flight_Parameter;
-		location_out: out data port;
-		status_change: out event port;
-		blockade: in event data port;
-		new_target: in event data port;
-END controller;
 
-THREAD IMPLEMENTATION controller.impl
-CALLS default: {
-  CS : SUBPROGRAM Controller_Spg;
-};
-CONNECTIONS
-  cnx1 : PARAMETER controller_in -> CS.controller_in;
-  cnx2 : PARAMETER CS.controller_out -> controller_out;
-PROPERTIES
-  Dispatch_Protocol => Periodic;
-  Priority => 20;
-  Compute_Execution_Time => 10ms..10ms;
-  Period => 1500ms;
-END controller.impl;
-
-SUBPROGRAM Controller_Spg
-FEATURES
-  controller_in : IN PARAMETER Radar_Types::Motor_Position;
-  controller_out : OUT PARAMETER Radar_Types::Motor_Position;
-PROPERTIES
-  Source_Language => (Ada95);
-  Source_Name => "radar.controller";
-ANNEX Behavior_Specification {**
-  STATES 
-    s : INITIAL FINAL STATE;
-  TRANSITIONS
-      t : s -[ ]-> s { controller_out := "angle" };
-**};
-END Controller_Spg;
-
-END drone_v1;
+end drone;

@@ -1,0 +1,123 @@
+package Drone
+public
+	with Base_Types;
+	with Data_Model;
+	
+system Drone
+	features
+		current_location: out data port;
+		status_change: out event port;
+		new_target: in event data port;
+end Drone;
+
+
+
+System implementation Drone.impl
+	subcomponents
+		the_GPS: device GPS;
+		the_weight_sensor: device WeightSensor;
+		the_height_sensor: device HeightSensor;
+		the_radar: device Radar;
+		the_aerial: device Aerial;
+		the_controller: process Controller.impl;
+		the_bus: bus HWConnection.impl;
+		the_processor: processor MainProcessor.impl;
+	connections
+		c1: port the_weight_sensor.weight -> the_controller.weight;
+		c2: port the_height_sensor.height -> the_controller.height;
+		c4: port the_GPS.location_in -> the_controller.location_in;
+		c5: port the_aerial.new_target -> the_controller.new_target;
+		c6: port the_radar.blockade -> the_controller.blockade;
+		c3: port the_controller.location_out -> the_aerial.location_out;
+		c7: port the_controller.status_change -> the_aerial.status_change;
+		c8: port new_target -> the_aerial.new_target_copy;
+		c9: port the_aerial.current_location -> current_location;
+		c10: port the_aerial.status_change_copy -> status_change;
+end Drone.impl;
+
+process Controller
+	features
+		weight: in data port Base_Types::Float;
+		location_in: in data port;
+		height: in data port Base_Types::Float;
+		location_out: out data port;
+		status_change: out event port;
+		blockade: in event data port;
+		new_target: in event data port;
+end Controller;
+
+process implementation Controller.impl
+end Controller.impl;
+
+device GPS
+	features
+		location_in: out data port;
+end GPS;
+	
+device implementation GPS.impl
+end GPS.impl;
+
+
+device WeightSensor	
+	features
+		weight: out data port Base_Types::Float;
+end WeightSensor;
+	
+device implementation WeightSensor.impl
+end WeightSensor.impl;
+
+
+device HeightSensor	
+	features
+		height: out data port Base_Types::Float;
+end HeightSensor;
+	
+device implementation HeightSensor.impl
+end HeightSensor.impl;
+
+
+device Radar	
+	features
+		blockade: out event data port;
+end Radar;
+	
+device implementation Radar.impl
+end Radar.impl;
+
+
+device Aerial
+	features
+		location_out: in data port;
+		current_location: out data port;
+		status_change: in event port;
+		status_change_copy: out event port;
+		new_target: out event data port;
+		new_target_copy: in event data port;
+		bus_access: requires bus access HWConnection;
+end Aerial;
+	
+device implementation Aerial.impl
+end Aerial.impl;
+
+bus HWConnection
+end HWConnection;
+	
+bus implementation HWConnection.impl
+end HWConnection.impl;
+
+
+processor MainProcessor
+	features
+		bus_access: requires bus access HWConnection.impl;
+end MainProcessor;
+	
+processor implementation MainProcessor.impl
+	subcomponents 
+		ram_memory: memory Ram;
+end MainProcessor.impl;
+
+memory Ram
+end Ram;
+	
+end Drone;
+
