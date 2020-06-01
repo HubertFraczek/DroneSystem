@@ -1,0 +1,96 @@
+package drone_common
+public
+with Drone_Types;
+
+DEVICE antenna
+  features
+	location_in: in data port;
+	current_location: out data port;
+	status_change: in event port;
+	status_change_copy: out event port;
+	new_target: out event data port;
+	new_target_copy: in event data port;
+    mem_bus : REQUIRES BUS ACCESS mem_bus;
+  --FLOWS
+   -- signal : FLOW SOURCE aerial_out;
+  PROPERTIES
+    Compute_Execution_Time => 1ms..2ms;
+    Deadline => 1ms;
+    Period => 1ms;
+  END antenna;
+
+  DEVICE drone_rotor
+  FEATURES
+    rotor_power_in : IN DATA PORT Drone_Types::Drone_Flight_Parameter;
+    mem_bus : REQUIRES BUS ACCESS mem_bus;
+  PROPERTIES
+    Compute_Execution_Time => 1ms..2ms;
+    Deadline => 1ms;
+    Period => 1ms;
+  END drone_rotor;
+
+  DEVICE operator
+    features
+		current_location: out data port;
+		status_change: out event port;
+		new_target: in event data port;
+  --FLOWS
+   -- signal : FLOW SINK screen_in;
+  PROPERTIES
+    Compute_Execution_Time => 1ms..2ms;
+    Deadline => 1ms;
+    Period => 1ms;
+  END operator;
+  
+  DEVICE GPS
+  	features
+  		location : OUT DATA PORT Drone_Types::Drone_Flight_Parameter;
+  		mem_bus : REQUIRES BUS ACCESS mem_bus;
+  end GPS;
+  
+  device weight_sensor
+  	features
+  		weight : OUT DATA PORT Drone_Types::Drone_Flight_Parameter;
+  		mem_bus : REQUIRES BUS ACCESS mem_bus;
+  end weight_sensor;
+  
+  device height_sensor
+  	features
+  		height_out : OUT DATA PORT Drone_Types::Drone_Flight_Parameter;
+  		mem_bus : REQUIRES BUS ACCESS mem_bus;
+  end height_sensor;
+  
+  device radar
+  	features
+  		blockade : OUT EVENT DATA PORT;
+		mem_bus : REQUIRES BUS ACCESS mem_bus;
+  end radar;
+  
+  
+  
+   -- The processor represent an abstraction of hardware and software
+  -- (OS) that is responsible for scheduling and executing the threads
+  -- (It may include functionalities provided by operating systems
+  -- such as scheduling protocol in our case).
+
+  PROCESSOR cpu_leon2
+  	FEATURES
+    	mem_bus : REQUIRES BUS ACCESS mem_bus;
+  	PROPERTIES
+  		Scheduling_protocol => (posix_1003_highest_priority_first_protocol);
+  END cpu_leon2;
+
+  -- The bus ensures communications between the antenna and the main
+  -- process stored in memory
+
+  BUS mem_bus
+  END mem_bus;
+
+  -- The memory hosts the address space of the main process.
+
+  MEMORY RAM
+  FEATURES
+    mem_bus : REQUIRES BUS ACCESS mem_bus;
+  END RAM;
+
+end drone_common;

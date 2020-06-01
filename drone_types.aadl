@@ -1,0 +1,14 @@
+package drone_types
+public
+with Data_Model;
+
+DATA Drone_Flight_Parameter
+  PROPERTIES
+    Data_Model::Data_Representation => float;
+END Drone_Flight_Parameter;
+
+
+
+
+ 
+end drone_types;

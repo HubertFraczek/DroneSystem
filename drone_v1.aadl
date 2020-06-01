@@ -1,0 +1,274 @@
+PACKAGE drone_v1
+PUBLIC
+
+WITH Drone_Common;
+WITH Drone_Types;
+-- Drone System
+
+SYSTEM drone
+END drone;
+
+-- System implementation is composed by physical devices (Hardware
+-- entity): antenna + processor + memory + bus and software entity :
+-- running processes and threads + operating system functionalities
+-- (scheduling) implemented in the processor that represent a part
+-- of execution platform and physical devices in the same time.
+SYSTEM IMPLEMENTATION drone.v1
+SUBCOMPONENTS
+  aerial : DEVICE drone_common::antenna;
+  drone_rotor : DEVICE drone_common::drone_rotor;
+  operator : DEVICE drone_common::operator;
+  GPS : DEVICE drone_common::GPS;
+  weight_sensor : DEVICE drone_common::weight_sensor;
+  height_sensor : DEVICE drone_common::height_sensor;
+  radar : DEVICE drone_common::radar;
+  cpu : PROCESSOR drone_common::cpu_leon2;
+  mem_bus : BUS drone_common::mem_bus;
+  RAM : MEMORY drone_common::RAM;
+  controller : PROCESS processing.others;
+CONNECTIONS
+  cnx1 : PORT controller.location_out -> aerial.location_in;
+  cnx2 : PORT aerial.new_target -> controller.new_target;
+  cnx3 : PORT controller.send_pulse -> aerial.antenna_in;
+  cnx4 : PORT controller.to_screen -> monitor.screen_in;
+  cnx5 : BUS ACCESS mem_bus -> aerial.mem_bus;
+  cnx6 : BUS ACCESS mem_bus -> radar.mem_bus;
+  cnx7 : BUS ACCESS mem_bus -> drone_rotor.mem_bus;
+  cnx8 : BUS ACCESS mem_bus -> GPS.mem_bus;
+  cnx9 : BUS ACCESS mem_bus -> weight_sensor.mem_bus;
+  cnx10 : BUS ACCESS mem_bus -> height_sensor.mem_bus;
+  
+  cnx11 : BUS ACCESS mem_bus -> cpu.mem_bus;
+  cnx12 : BUS ACCESS mem_bus -> RAM.mem_bus;
+PROPERTIES
+	Actual_Processor_Binding => (REFERENCE(cpu)) APPLIES TO controller;
+ 	Actual_Memory_Binding => (REFERENCE(ram)) APPLIES TO controller;
+  	Actual_Connection_Binding => (REFERENCE(mem_bus)) APPLIES TO cnx1, cnx2, cnx3, cnx4;
+END drone.v1;
+
+-- The controller process is responsible for signals processing :
+-- Pattern:
+--    transmitter -> antenna -> receiver -> analyser -> display
+
+PROCESS processing
+FEATURES
+  to_screen : OUT EVENT PORT;
+  send_pulse : OUT EVENT PORT;
+  receive_pulse : IN DATA PORT Radar_Types::Target_Distance;
+  get_angle : IN DATA PORT Radar_Types::Motor_Position;
+END processing;
+
+PROCESS IMPLEMENTATION processing.others
+SUBCOMPONENTS
+  receive : THREAD receiver.impl;
+  analyse : THREAD analyser.impl;
+  display : THREAD display_panel.impl;
+  transmit : THREAD transmitter.impl;
+  control_angle : THREAD controller.impl;
+CONNECTIONS
+  cnx1 : PORT receive_pulse -> receive.receiver_in;
+  cnx2 : PORT display.display_out -> to_screen;
+  cnx3 : PORT transmit.transmitter_out -> send_pulse;
+  cnx4 : PORT get_angle -> control_angle.controller_in;
+  cnx5 : PORT receive.receiver_out -> analyse.from_receiver;
+  cnx6 : PORT analyse.analyser_out -> display.display_in;
+  cnx7 : PORT transmit.transmitter_out -> analyse.from_transmitter;
+  cnx8 : PORT control_angle.controller_out -> analyse.from_controller;
+END processing.others;
+
+-- --------------------
+--  Receiver Thread --
+-- --------------------
+-- 
+-- This thread receives radar echos from the antenna.
+
+THREAD receiver
+FEATURES
+  receiver_in : IN DATA PORT Radar_Types::Target_Distance;
+  receiver_out : OUT DATA PORT Radar_Types::Target_Distance;
+END receiver;
+
+THREAD IMPLEMENTATION receiver.impl
+CALLS default: {
+  RS : SUBPROGRAM Receiver_Spg;
+};
+CONNECTIONS
+  cnx1 : PARAMETER receiver_in -> RS.receiver_in;
+  cnx2 : PARAMETER RS.receiver_out -> receiver_out;
+PROPERTIES
+  Dispatch_Protocol => Periodic;
+  Priority => 13;
+  Compute_Execution_Time => 10ms..20ms;
+  Period => 1500ms;
+END receiver.impl;
+
+SUBPROGRAM Receiver_Spg
+FEATURES
+  receiver_in : IN PARAMETER Radar_Types::Target_Distance;
+  receiver_out : OUT PARAMETER Radar_Types::Target_Distance;
+PROPERTIES
+  Source_Language => (Ada95);
+  Source_Name => "radar.receiver";
+ANNEX Behavior_Specification {**
+  STATES
+    s : INITIAL FINAL STATE;
+  TRANSITIONS
+    t : s -[ ]-> s { receiver_out := "echo" };
+**};
+END Receiver_Spg;
+
+-- ---------------------
+--   Analyser thread --
+-- ---------------------
+-- 
+-- This thread compares transmitted and received signals to perform
+-- detection, localisation and identification.
+
+THREAD analyser
+FEATURES
+  from_transmitter : IN DATA PORT radar_types::Radar_Pulse;
+  analyser_out : OUT DATA PORT radar_types::Target_Position;
+  from_receiver : IN DATA PORT Radar_Types::Target_Distance;
+  from_controller : IN DATA PORT Radar_Types::Motor_Position;
+END analyser;
+
+THREAD IMPLEMENTATION analyser.impl
+CALLS default: {
+  AS : SUBPROGRAM Analyser_Spg;
+};
+CONNECTIONS
+  cnx1 : PARAMETER AS.analyser_out -> analyser_out;
+  cnx2 : PARAMETER from_receiver -> AS.from_receiver;
+  cnx3 : PARAMETER from_controller -> AS.from_controller;
+PROPERTIES
+  Dispatch_Protocol => Periodic;
+  Priority => 12;
+  Compute_Execution_Time => 40ms..60ms;
+  Period => 5000ms;
+END analyser.impl;
+
+SUBPROGRAM Analyser_Spg
+FEATURES
+  analyser_out : OUT PARAMETER radar_types::Target_Position;
+  from_receiver : IN PARAMETER Radar_Types::Target_Distance;
+  from_controller : IN PARAMETER Radar_Types::Motor_Position;
+PROPERTIES
+  Source_Language => (Ada95);
+  Source_Name => "radar.analyser";
+ANNEX Behavior_Specification {**
+  STATES 
+    s : INITIAL FINAL STATE;
+  TRANSITIONS
+    t : s -[ ]-> s { analyser_out := "distance" };
+**};
+END Analyser_Spg;
+
+-- -------------------------
+--   Display_Panel thread --
+-- -------------------------
+-- 
+-- This thread is responsible for formatting and displaying
+-- processed signals
+
+THREAD display_panel
+FEATURES
+  display_out : OUT EVENT PORT;
+  display_in : IN DATA PORT radar_types::Target_Position;
+END display_panel;
+
+THREAD IMPLEMENTATION display_panel.impl
+CALLS default: {
+  DS : SUBPROGRAM Display_Spg;
+};
+CONNECTIONS
+  cnx1 : PARAMETER display_in -> DS.display_in;
+PROPERTIES
+  Dispatch_Protocol => Periodic;
+  Priority => 10;
+  Compute_Execution_Time => 10ms..30ms;
+  Period => 2000ms;
+END display_panel.impl;
+
+SUBPROGRAM Display_Spg
+FEATURES
+  display_in : IN PARAMETER radar_types::Target_Position; 
+PROPERTIES
+  Source_Language => (Ada95);
+  Source_Name => "radar.display_panel";
+ANNEX Behavior_Specification {**
+  STATES 
+    s : INITIAL FINAL STATE;
+  TRANSITIONS
+    t : s -[ ]-> s { display_out! };
+**};
+END Display_Spg;
+
+-- ----------------------
+--  Transmitter thread --
+-- -----------------------
+
+THREAD transmitter
+FEATURES
+  transmitter_out : OUT DATA PORT radar_types::Radar_Pulse;
+END transmitter;
+
+THREAD IMPLEMENTATION transmitter.impl
+PROPERTIES
+  Dispatch_Protocol => Periodic;
+  Priority => 21;
+  Compute_Execution_Time => 10ms..10ms;
+  Period => 500ms;
+  Compute_Entrypoint_Source_Text => "radar.transmitter";
+ANNEX Behavior_Specification {**
+  STATES
+    s : INITIAL COMPLETE FINAL STATE;
+  TRANSITIONS
+    t : s -[ON DISPATCH]-> s { transmitter_out := "ping" };
+**};
+END transmitter.impl;
+
+-- ---------------------
+--  Controller thread --
+-- ---------------------
+
+THREAD controller
+features
+		weight: in data port Drone_Types::Drone_Flight_Parameter;
+		location_in: in data port;
+		height: in data port Drone_Types::Drone_Flight_Parameter;
+		location_out: out data port;
+		status_change: out event port;
+		blockade: in event data port;
+		new_target: in event data port;
+END controller;
+
+THREAD IMPLEMENTATION controller.impl
+CALLS default: {
+  CS : SUBPROGRAM Controller_Spg;
+};
+CONNECTIONS
+  cnx1 : PARAMETER controller_in -> CS.controller_in;
+  cnx2 : PARAMETER CS.controller_out -> controller_out;
+PROPERTIES
+  Dispatch_Protocol => Periodic;
+  Priority => 20;
+  Compute_Execution_Time => 10ms..10ms;
+  Period => 1500ms;
+END controller.impl;
+
+SUBPROGRAM Controller_Spg
+FEATURES
+  controller_in : IN PARAMETER Radar_Types::Motor_Position;
+  controller_out : OUT PARAMETER Radar_Types::Motor_Position;
+PROPERTIES
+  Source_Language => (Ada95);
+  Source_Name => "radar.controller";
+ANNEX Behavior_Specification {**
+  STATES 
+    s : INITIAL FINAL STATE;
+  TRANSITIONS
+      t : s -[ ]-> s { controller_out := "angle" };
+**};
+END Controller_Spg;
+
+END drone_v1;
