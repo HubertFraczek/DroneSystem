@@ -34,14 +34,17 @@ system implementation Drone.impl
 	connections
 		c1: port the_weight_sensor.weight -> the_controller.weight;
 		c2: port the_height_sensor.height -> the_controller.height;
-		c4: port the_GPS.location_in -> the_controller.location_in;
+		c4: port the_GPS.location_out -> the_controller.location_in;
 		c5: port the_aerial.new_target -> the_controller.new_target;
-		c6: port the_radar.blockade -> the_controller.blockade;
+		c6: port the_radar.blockade -> the_controller.blockade_in;
 		c3: port the_controller.location_out -> the_aerial.location_out;
 		c7: port the_controller.status_change -> the_aerial.status_change;
 		c8: port the_operator.new_target -> the_aerial.new_target_copy;
 		c9: port the_aerial.current_location -> the_operator.current_location;
 		c10: port the_aerial.status_change_copy -> the_operator.status_change;
+		c11: port the_controller.rotor_power_out -> the_drone_rotor.rotor_power_in;
+		c12: port the_drone_rotor.rotor_power_out -> the_controller.rotor_power_in;
+		
 		
 		c21: bus access the_bus -> the_GPS.bus_access;
 		c22: bus access the_bus -> the_weight_sensor.bus_access;
@@ -60,8 +63,10 @@ process Controller
 		height: in data port Base_Types::Float;
 		location_out: out data port;
 		status_change: out event port;
-		blockade: in event data port;
+		blockade_in: in event data port;
 		new_target: in event data port;
+		rotor_power_out: out data port Base_Types::Float;
+		rotor_power_in: in data port Base_Types::Float;
 end Controller;
 
 process implementation Controller.with_threads
@@ -72,6 +77,24 @@ process implementation Controller.with_threads
 		thread_radar: thread ScanArea.impl;
 		thread_gps: thread GPSData.impl; 
 		thread_analyse_data: thread AnalyseData.impl;
+	connections
+		c1: port weight -> thread_weight.weight_in;
+		c2: port height -> thread_height.height_in;
+		c3: port location_in -> thread_gps.location_in;
+		c4: port blockade_in -> thread_radar.blockade_in;
+		c5: port location_in -> thread_gps.location_in;
+		c6: port thread_gps.location_out -> location_out;
+		c7: port thread_analyse_data.status_change -> status_change;
+		c8: port new_target -> thread_analyse_data.new_target;
+		
+		c10: port thread_weight.weight_out -> thread_analyse_data.weight_in;
+		c11: port thread_height.height_out -> thread_analyse_data.height_in;
+		c12: port thread_radar.blockade_out -> thread_analyse_data.blockade_in;
+		c13: port thread_gps.location_out -> thread_analyse_data.location_in;
+		c14: port thread_rotor.rotor_power_out -> thread_analyse_data.rotor_power_in;
+		c15: port thread_analyse_data.rotor_power_out -> rotor_power_out;
+		c16: port rotor_power_in -> thread_rotor.rotor_power_in;
+		
 end Controller.with_threads;
 
 -- --------------------
@@ -80,7 +103,7 @@ end Controller.with_threads;
 
 device GPS
 	features
-		location_in: out data port;
+		location_out: out data port;
 		bus_access: requires bus access HWConnection;
 end GPS;
 	
@@ -133,7 +156,8 @@ end Aerial.impl;
 
 device DroneRotor
   features
-    rotor_power_in : in data port;
+    rotor_power_in : in data port Base_Types::Float;
+    rotor_power_out: out data port Base_Types::Float;
     bus_access : requires bus access HWConnection;
 end DroneRotor;
 
@@ -165,8 +189,8 @@ end Ram;
 
 thread ReadWeight
 	features
-		weight_in: in data port;
-		weight_out: out data port;
+		weight_in: in data port Base_Types::Float;
+		weight_out: out data port Base_Types::Float;
 end ReadWeight;
 
 thread implementation ReadWeight.impl
@@ -174,8 +198,8 @@ end ReadWeight.impl;
 
 thread ReadHeight
 	features
-		height_in: in data port;
-		height_out: out data port;
+		height_in: in data port Base_Types::Float;
+		height_out: out data port Base_Types::Float;
 end ReadHeight;
 
 thread implementation ReadHeight.impl
@@ -183,8 +207,8 @@ end ReadHeight.impl;
 
 thread RotorPower
 	features
-		rotor_power_in: in data port;
-		rotor_power_out: out data port;	
+		rotor_power_in: in data port Base_Types::Float;
+		rotor_power_out: out data port Base_Types::Float;
 end RotorPower;
 
 thread implementation RotorPower.impl
@@ -192,8 +216,8 @@ end RotorPower.impl;
 
 thread ScanArea
 	features
-		area_in: in event port;
-		area_out: out event port;
+		blockade_in: in event port;
+		blockade_out: out event port;
 end ScanArea;
 
 thread implementation ScanArea.impl
@@ -201,8 +225,8 @@ end ScanArea.impl;
 
 thread GPSData
 	features
-		gps_in: in data port;
-		gps_out: out data port;
+		location_in: in data port;
+		location_out: out data port;
 end GPSData;
 
 thread implementation GPSData.impl
@@ -210,11 +234,14 @@ end GPSData.impl;
 
 thread AnalyseData
 	features
-		gps_in: in data port;
-		area_in: in event port;
-		height_in: in data port;
-		weight_in: in data port;
-		rotor_power_out: out data port; 
+		location_in: in data port;
+		blockade_in: in event port;
+		height_in: in data port Base_Types::Float;
+		weight_in: in data port Base_Types::Float;
+		rotor_power_out: out data port Base_Types::Float; 
+		rotor_power_in: in data port Base_Types::Float; 
+		status_change: out event port;
+		new_target: in event data port;
 end AnalyseData;
 
 thread implementation AnalyseData.impl
