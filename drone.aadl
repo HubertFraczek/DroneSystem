@@ -76,17 +76,18 @@ process implementation Controller.with_threads
 		thread_rotor: thread RotorPower.impl;
 		thread_radar: thread ScanArea.impl;
 		thread_gps: thread GPSData.impl; 
+		thread_aerial: thread AerialThread.impl;
 		thread_analyse_data: thread AnalyseData.impl;
 	connections
 		c1: port weight -> thread_weight.weight_in;
 		c2: port height -> thread_height.height_in;
 		c3: port location_in -> thread_gps.location_in;
 		c4: port blockade_in -> thread_radar.blockade_in;
-		c5: port location_in -> thread_gps.location_in;
+		
 		c6: port thread_gps.location_out -> location_out;
 		c7: port thread_analyse_data.status_change -> status_change;
-		c8: port new_target -> thread_analyse_data.new_target;
-		
+		c8: port new_target -> thread_aerial.new_target_in;
+		c9: port thread_aerial.new_target_out -> thread_analyse_data.new_target;
 		c10: port thread_weight.weight_out -> thread_analyse_data.weight_in;
 		c11: port thread_height.height_out -> thread_analyse_data.height_in;
 		c12: port thread_radar.blockade_out -> thread_analyse_data.blockade_in;
@@ -231,6 +232,15 @@ end GPSData;
 
 thread implementation GPSData.impl
 end GPSData.impl;
+
+thread AerialThread
+	features
+		new_target_in: in event data port;
+		new_target_out: out event data port;
+end AerialThread;
+
+thread implementation AerialThread.impl
+end AerialThread.impl;
 
 thread AnalyseData
 	features
