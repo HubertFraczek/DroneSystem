@@ -420,7 +420,7 @@
           <point x="1182.0" y="650.0"/>
           <point x="1182.0" y="719.0"/>
           <point x="752.0" y="718.0"/>
-          <point x="752.0" y="1150.0"/>
+          <point x="752.0" y="1157.0"/>
         </bendpoints>
       </element>
       <element uuid="05889eff-29e9-4306-91bd-161de78b2a46" manual="true">
@@ -625,6 +625,24 @@
           <point x="794.0" y="560.0"/>
         </bendpoints>
       </element>
+      <element uuid="8b743f1e-4bc8-44d4-911a-43d79d468032" manual="true">
+        <element uuid="96db0ec3-69c1-4a7c-9fd1-29fe6760f66e" manual="true">
+          <bo>
+            <seg>tag</seg>
+            <seg>unidirectional</seg>
+          </bo>
+        </element>
+        <bo>
+          <seg>connection</seg>
+          <seg>c9</seg>
+        </bo>
+        <bendpoints>
+          <point x="1193.0" y="553.0"/>
+          <point x="1193.0" y="731.0"/>
+          <point x="766.0" y="731.0"/>
+          <point x="766.0" y="1110.0"/>
+        </bendpoints>
+      </element>
       <element uuid="2442c343-fac9-45b5-8b81-762ac3a2e473" manual="true" dockArea="left">
         <bo>
           <seg>feature</seg>
@@ -710,6 +728,13 @@
           </bo>
           <position y="150.0"/>
         </element>
+        <element uuid="1d051838-6b31-4aae-95c1-db9cfb23f343" manual="true" dockArea="left">
+          <bo>
+            <seg>feature</seg>
+            <seg>new_target</seg>
+          </bo>
+          <position y="260.0"/>
+        </element>
         <element uuid="0fb34036-39b2-495d-8888-f52f6fdc41c4" manual="true" dockArea="left">
           <bo>
             <seg>feature</seg>
@@ -736,14 +761,14 @@
             <seg>feature</seg>
             <seg>weight_in</seg>
           </bo>
-          <position y="300.0"/>
+          <position y="306.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>
           <seg>thread_analyse_data</seg>
         </bo>
         <position x="182.0" y="763.0"/>
-        <size width="340.0" height="361.0"/>
+        <size width="340.0" height="383.0"/>
       </element>
       <element uuid="ff22cd56-0dfe-47af-8444-7d2b9d78ee19" manual="true">
         <element uuid="d5e21652-0b42-4502-81a9-db0eb6355307" manual="true" dockArea="left">
@@ -840,6 +865,13 @@
             <seg>new_target_in</seg>
           </bo>
           <position y="30.0"/>
+        </element>
+        <element uuid="b19be80e-ef5c-4ddf-a575-4a7ab7cded8e" manual="true" dockArea="right">
+          <bo>
+            <seg>feature</seg>
+            <seg>new_target_out</seg>
+          </bo>
+          <position x="175.0" y="20.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>

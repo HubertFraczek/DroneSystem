@@ -87,7 +87,7 @@ process implementation Controller.with_threads
 		c6: port thread_gps.location_out -> location_out;
 		c7: port thread_analyse_data.status_change -> status_change;
 		c8: port new_target -> thread_set_target.new_target_in;
-		--c9: port thread_aerial.new_target_out -> thread_analyse_data.new_target;
+		c9: port thread_set_target.new_target_out -> thread_analyse_data.new_target;
 		c10: port thread_weight.weight_out -> thread_analyse_data.weight_in;
 		c11: port thread_height.height_out -> thread_analyse_data.height_in;
 		c12: port thread_radar.blockade_out -> thread_analyse_data.blockade_in;
@@ -236,7 +236,7 @@ end GPSData.impl;
 thread SetNewTarget
 	features
 		new_target_in: in event data port;
-		--new_target_out: out event data port;
+		new_target_out: out event data port;
 end SetNewTarget;
 
 thread implementation SetNewTarget.impl
@@ -251,7 +251,7 @@ thread AnalyseData
 		rotor_power_out: out data port Base_Types::Float; 
 		rotor_power_in: in data port Base_Types::Float; 
 		status_change: out event port;
-		--new_target: in event data port;
+		new_target: in event data port;
 end AnalyseData;
 
 thread implementation AnalyseData.impl
