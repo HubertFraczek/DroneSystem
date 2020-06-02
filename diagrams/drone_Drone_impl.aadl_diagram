@@ -625,24 +625,6 @@
           <point x="794.0" y="560.0"/>
         </bendpoints>
       </element>
-      <element uuid="8981c07d-e092-45c0-8325-27674439264f" manual="true">
-        <element uuid="99dbb820-02fb-4387-bf4f-b74817924e61" manual="true">
-          <bo>
-            <seg>tag</seg>
-            <seg>unidirectional</seg>
-          </bo>
-        </element>
-        <bo>
-          <seg>connection</seg>
-          <seg>c9</seg>
-        </bo>
-        <bendpoints>
-          <point x="1194.0" y="560.0"/>
-          <point x="1194.0" y="736.0"/>
-          <point x="766.0" y="736.0"/>
-          <point x="766.0" y="1100.0"/>
-        </bendpoints>
-      </element>
       <element uuid="2442c343-fac9-45b5-8b81-762ac3a2e473" manual="true" dockArea="left">
         <bo>
           <seg>feature</seg>
@@ -706,28 +688,6 @@
         </bo>
         <position y="110.0"/>
       </element>
-      <element uuid="7926e656-87ee-4f64-9764-c3fb07125223" manual="true">
-        <element uuid="1850b3ba-ad72-4bf1-8b38-2a659d062758" manual="true" dockArea="left">
-          <bo>
-            <seg>feature</seg>
-            <seg>new_target_in</seg>
-          </bo>
-          <position y="30.0"/>
-        </element>
-        <element uuid="c697e3ed-2ead-49f5-8252-db22d56f0eac" manual="true" dockArea="right">
-          <bo>
-            <seg>feature</seg>
-            <seg>new_target_out</seg>
-          </bo>
-          <position x="213.0" y="30.0"/>
-        </element>
-        <bo>
-          <seg>subcomponent</seg>
-          <seg>thread_aerial</seg>
-        </bo>
-        <position x="154.0" y="443.0"/>
-        <size width="321.0" height="79.0"/>
-      </element>
       <element uuid="ac1d6bf7-3d7d-4d02-9fff-6d9b4a1d5c40" manual="true">
         <element uuid="bc5c81dc-224d-4902-b029-3842b58137cc" manual="true" dockArea="left">
           <bo>
@@ -749,13 +709,6 @@
             <seg>location_in</seg>
           </bo>
           <position y="150.0"/>
-        </element>
-        <element uuid="0c4fff6f-ce3b-4b48-9700-fca6632ffc01" manual="true" dockArea="left">
-          <bo>
-            <seg>feature</seg>
-            <seg>new_target</seg>
-          </bo>
-          <position y="250.0"/>
         </element>
         <element uuid="0fb34036-39b2-495d-8888-f52f6fdc41c4" manual="true" dockArea="left">
           <bo>
@@ -879,6 +832,21 @@
         </bo>
         <position x="164.0" y="167.0"/>
         <size width="320.0" height="85.0"/>
+      </element>
+      <element uuid="cea574f3-8b92-4383-88de-ebfc4b2c1e68" manual="true">
+        <element uuid="c5192aeb-1567-4742-bd28-fa66341c9396" manual="true" dockArea="left">
+          <bo>
+            <seg>feature</seg>
+            <seg>new_target_in</seg>
+          </bo>
+          <position y="30.0"/>
+        </element>
+        <bo>
+          <seg>subcomponent</seg>
+          <seg>thread_set_target</seg>
+        </bo>
+        <position x="162.0" y="443.0"/>
+        <size width="283.0" height="81.0"/>
       </element>
       <element uuid="6bc478ed-aeb5-4fd5-87b1-b5170dad5eb9" manual="true">
         <element uuid="76a0a2b9-153a-4ab0-a205-dfffac963677" manual="true" dockArea="left">
