@@ -1,7 +1,7 @@
 package drone
 public
 	with Base_Types;
-	with Data_Model;
+	--with Data_Model;
 	
 system Drone
 	--features
@@ -54,6 +54,9 @@ system implementation Drone.impl
 		c26: bus access the_bus -> the_ram.bus_access;
 		c27: bus access the_bus -> the_processor.bus_access;
 		c28: bus access the_bus -> the_drone_rotor.bus_access;
+		
+	properties
+		Actual_Processor_Binding => (reference(the_processor)) applies to the_controller;
 end Drone.impl;
 
 process Controller
@@ -95,7 +98,8 @@ process implementation Controller.with_threads
 		c14: port thread_rotor.rotor_power_out -> thread_analyse_data.rotor_power_in;
 		c15: port thread_analyse_data.rotor_power_out -> rotor_power_out;
 		c16: port rotor_power_in -> thread_rotor.rotor_power_in;
-		
+	properties
+		Timing => immediate applies to c1, c2, c3, c4, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16;
 end Controller.with_threads;
 
 -- --------------------
@@ -174,6 +178,8 @@ end HWConnection.impl;
 processor MainProcessor
 	features
 		bus_access: requires bus access HWConnection.impl;
+	properties
+   	  	Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
 end MainProcessor;
 	
 processor implementation MainProcessor.impl
@@ -195,6 +201,12 @@ thread ReadWeight
 end ReadWeight;
 
 thread implementation ReadWeight.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 1;
+  		Compute_Execution_Time => 1ms..5ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end ReadWeight.impl;
 
 thread ReadHeight
@@ -204,6 +216,12 @@ thread ReadHeight
 end ReadHeight;
 
 thread implementation ReadHeight.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 3;
+  		Compute_Execution_Time => 1ms..5ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end ReadHeight.impl;
 
 thread RotorPower
@@ -213,6 +231,12 @@ thread RotorPower
 end RotorPower;
 
 thread implementation RotorPower.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 7;
+  		Compute_Execution_Time => 1ms..5ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end RotorPower.impl;
 
 thread ScanArea
@@ -222,6 +246,12 @@ thread ScanArea
 end ScanArea;
 
 thread implementation ScanArea.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 5;
+  		Compute_Execution_Time => 1ms..5ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end ScanArea.impl;
 
 thread GPSData
@@ -231,6 +261,12 @@ thread GPSData
 end GPSData;
 
 thread implementation GPSData.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 2;
+  		Compute_Execution_Time => 1ms..5ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end GPSData.impl;
 
 thread SetNewTarget
@@ -240,6 +276,12 @@ thread SetNewTarget
 end SetNewTarget;
 
 thread implementation SetNewTarget.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 8;
+  		Compute_Execution_Time => 1ms..5ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end SetNewTarget.impl;
 
 thread AnalyseData
@@ -255,6 +297,12 @@ thread AnalyseData
 end AnalyseData;
 
 thread implementation AnalyseData.impl
+	Properties
+  		Dispatch_Protocol => Periodic;
+  		Priority => 10;
+  		Compute_Execution_Time => 50ms..100ms;
+  		Period => 200ms;
+  		Deadline => 200ms;
 end AnalyseData.impl;
 
 end drone;
