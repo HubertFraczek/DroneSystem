@@ -29,7 +29,7 @@ public
 			the_operator: system Operator;
 			the_controller: process Controller.with_threads;
 			the_bus: bus HWConnection.impl;
-			the_ram: memory Ram;
+			the_ram: memory Ram.impl;
 			the_processor: processor MainProcessor.impl;
 		connections
 			c1: port the_weight_sensor.weight -> the_controller.weight;
@@ -53,9 +53,11 @@ public
 			c26: bus access the_bus -> the_ram.bus_access;
 			c27: bus access the_bus -> the_processor.bus_access;
 			c28: bus access the_bus -> the_drone_rotor.bus_access;
+			--c29: bus access the_bus -> the_controller.bus_access;
 
 		properties
 			Actual_Processor_Binding => (reference (the_processor)) applies to the_controller;
+			Actual_Memory_Binding => (reference (the_ram)) applies to the_controller;
 	end Drone.impl;
 
 	process Controller
@@ -72,6 +74,7 @@ public
 	end Controller;
 
 	process implementation Controller.with_threads
+		
 		subcomponents
 			thread_weight: thread ReadWeight.impl;
 			thread_height: thread ReadHeight.impl;
@@ -186,10 +189,16 @@ public
 			bus_access: requires bus access HWConnection.impl;
 	end Ram;
 
+	memory implementation Ram.impl
+	end Ram.impl;
+	
 -- --------------------
 --    Subprograms    --
 -- --------------------
 	subprogram ReadWeight_Spg
+		features
+			weight_in: in parameter Base_Types::Float;
+			weight_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_readweight_spg";
@@ -198,6 +207,9 @@ public
 
 
 	subprogram ReadHeight_Spg
+		features
+			height_in: in parameter Base_Types::Float;
+			height_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_readheight_spg";
@@ -205,6 +217,9 @@ public
 	end ReadHeight_Spg;
 	
 	subprogram RotorPower_Spg
+		features
+			rotor_power_in: in parameter Base_Types::Float;
+			rotor_power_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_rotorpower_spg";
@@ -219,6 +234,9 @@ public
 	end ScanArea_Spg;
 	
 	subprogram GPSData_Spg
+		features
+			location_in: in parameter Base_Types::Float;
+			location_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_gpsdata_spg";
@@ -226,6 +244,9 @@ public
 	end GPSData_Spg;
 	
 	subprogram SetNewTarget_Spg
+		features
+			new_target_in: in parameter Base_Types::Float;
+			new_target_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_setnewtarget_spg";
@@ -233,6 +254,13 @@ public
 	end SetNewTarget_Spg;
 	
 	subprogram AnalyseData_Spg
+		features
+			location_in: in parameter Base_Types::Float;
+			height_in: in parameter Base_Types::Float;
+			weight_in: in parameter Base_Types::Float;
+			rotor_power_out: out parameter Base_Types::Float;
+			rotor_power_in: in parameter Base_Types::Float;
+			new_target: in parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_analysedata_spg";
@@ -255,6 +283,9 @@ public
 			Mycalls: {
 				P_Spg: subprogram ReadWeight_Spg;
 			};
+		connections
+			c0: parameter weight_in -> P_Spg.weight_in;
+			c1: parameter P_Spg.weight_out -> weight_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 1;
@@ -274,6 +305,9 @@ public
 			Mycalls: {
 				P_Spg: subprogram ReadHeight_Spg;
 			};
+		connections
+			c0: parameter height_in -> P_Spg.height_in;
+			c1: parameter P_Spg.height_out -> height_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 3;
@@ -293,6 +327,9 @@ public
 			Mycalls: {
 				P_Spg: subprogram RotorPower_Spg;
 			};
+		connections
+			c0: parameter rotor_power_in -> P_Spg.rotor_power_in;
+			c1: parameter P_Spg.rotor_power_out -> rotor_power_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 7;
@@ -331,6 +368,9 @@ public
 			Mycalls: {
 				P_Spg: subprogram GPSData_Spg;
 			};
+		connections
+			c0: parameter location_in -> P_Spg.location_in;
+			c1: parameter P_Spg.location_out -> location_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 2;
@@ -350,6 +390,9 @@ public
 			Mycalls: {
 				P_Spg: subprogram SetNewTarget_Spg;
 			};
+		connections
+			c0: parameter new_target_in -> P_Spg.new_target_in;
+			c1: parameter P_Spg.new_target_out -> new_target_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 8;
@@ -375,6 +418,13 @@ public
 			Mycalls: {
 				P_Spg: subprogram AnalyseData_Spg;
 			};
+		connections
+			c0: parameter location_in -> P_Spg.location_in;
+			c1: parameter height_in -> P_Spg.height_in;
+			c2: parameter weight_in -> P_Spg.weight_in;
+			c3: parameter rotor_power_in -> P_Spg.rotor_power_in;
+			c4: parameter new_target -> P_Spg.new_target;
+			c5: parameter P_Spg.rotor_power_out -> rotor_power_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 10;
