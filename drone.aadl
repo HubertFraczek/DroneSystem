@@ -58,6 +58,18 @@ public
 		properties
 			Actual_Processor_Binding => (reference (the_processor)) applies to the_controller;
 			Actual_Memory_Binding => (reference (the_ram)) applies to the_controller;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c1;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c2;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c3;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c4;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c5;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c6;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c7;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c8;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c9;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c10;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c11;
+			Actual_Connection_Binding => (reference (the_bus)) applies to c12;
 	end Drone.impl;
 
 	process Controller
@@ -168,6 +180,8 @@ public
 	end DroneRotor.impl;
 
 	bus HWConnection
+		properties 
+			Transport_layer => (Data_Connection, Event_Connection);
 	end HWConnection;
 
 	bus implementation HWConnection.impl
