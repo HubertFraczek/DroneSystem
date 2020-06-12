@@ -11,65 +11,53 @@ public
 		--new_target: in event data port;
 	end Drone;
 
-	system Operator
-		features
-			current_location: in data port Base_Types::Float;
-			status_change: in event port;
-			new_target: out event data port Base_Types::Float;
-	end Operator;
 
 	system implementation Drone.impl
-		subcomponents
-			the_GPS: device GPS.impl;
-			the_weight_sensor: device WeightSensor.impl;
-			the_height_sensor: device HeightSensor.impl;
-			the_radar: device Radar.impl;
-			the_aerial: device Aerial.impl;
-			the_drone_rotor: device DroneRotor.impl;
-			the_operator: system Operator;
-			the_controller: process Controller.with_threads;
-			the_bus: bus HWConnection.impl;
-			the_ram: memory Ram.impl;
-			the_processor: processor MainProcessor.impl;
-		connections
-			c1: port the_weight_sensor.weight -> the_controller.weight;
-			c2: port the_height_sensor.height -> the_controller.height;
-			c4: port the_GPS.location_out -> the_controller.location_in;
-			c5: port the_aerial.new_target -> the_controller.new_target;
-			c6: port the_radar.blockade -> the_controller.blockade_in;
-			c3: port the_controller.location_out -> the_aerial.location_out;
-			c7: port the_controller.status_change -> the_aerial.status_change;
-			c8: port the_operator.new_target -> the_aerial.new_target_copy;
-			c9: port the_aerial.current_location -> the_operator.current_location;
-			c10: port the_aerial.status_change_copy -> the_operator.status_change;
-			c11: port the_controller.rotor_power_out -> the_drone_rotor.rotor_power_in;
-			c12: port the_drone_rotor.rotor_power_out -> the_controller.rotor_power_in;
+	subcomponents
+		the_GPS: device GPS.impl;
+		the_weight_sensor: device WeightSensor.impl;
+		the_height_sensor: device HeightSensor.impl;
+		the_radar: device Radar.impl;
+		the_aerial: device Aerial.impl;
+		the_drone_rotor: device DroneRotor.impl;
 
-			c21: bus access the_bus -> the_GPS.bus_access;
-			c22: bus access the_bus -> the_weight_sensor.bus_access;
-			c23: bus access the_bus -> the_height_sensor.bus_access;
-			c24: bus access the_bus -> the_aerial.bus_access;
-			c25: bus access the_bus -> the_radar.bus_access;
-			c26: bus access the_bus -> the_ram.bus_access;
-			c27: bus access the_bus -> the_processor.bus_access;
-			c28: bus access the_bus -> the_drone_rotor.bus_access;
+		the_controller: process Controller.with_threads;
+		the_bus: bus HWConnection.impl;
+		the_ram: memory Ram.impl;
+		the_processor: processor MainProcessor.impl;
+	connections
+		c1: port the_weight_sensor.weight -> the_controller.weight;
+		c2: port the_height_sensor.height -> the_controller.height;
+		c4: port the_GPS.location_out -> the_controller.location_in;
+		c5: port the_aerial.new_target -> the_controller.new_target;
+		c6: port the_radar.blockade -> the_controller.blockade_in;
+		c3: port the_controller.location_out -> the_aerial.location_out;
+		c7: port the_controller.status_change -> the_aerial.status_change;
+		c11: port the_controller.rotor_power_out -> the_drone_rotor.rotor_power_in;
+		c12: port the_drone_rotor.rotor_power_out -> the_controller.rotor_power_in;
 
-		properties
-			Actual_Processor_Binding => (reference (the_processor)) applies to the_controller;
-			Actual_Memory_Binding => (reference (the_ram)) applies to the_controller;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c1;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c2;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c3;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c4;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c5;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c6;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c7;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c8;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c9;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c10;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c11;
-			Actual_Connection_Binding => (reference (the_bus)) applies to c12;
-	end Drone.impl;
+		c21: bus access the_bus -> the_GPS.bus_access;
+		c22: bus access the_bus -> the_weight_sensor.bus_access;
+		c23: bus access the_bus -> the_height_sensor.bus_access;
+		c24: bus access the_bus -> the_aerial.bus_access;
+		c25: bus access the_bus -> the_radar.bus_access;
+		c26: bus access the_bus -> the_ram.bus_access;
+		c27: bus access the_bus -> the_processor.bus_access;
+		c28: bus access the_bus -> the_drone_rotor.bus_access;
+
+	properties
+		Actual_Processor_Binding => (reference (the_processor)) applies to the_controller;
+		Actual_Memory_Binding => (reference (the_ram)) applies to the_controller;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c1;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c2;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c3;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c4;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c5;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c6;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c7;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c11;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c12;
+end Drone.impl;
 
 	process Controller
 		features
@@ -157,11 +145,8 @@ public
 	device Aerial
 		features
 			location_out: in data port Base_Types::Float;
-			current_location: out data port Base_Types::Float;
-			status_change: in event port;
-			status_change_copy: out event port;
 			new_target: out event data port Base_Types::Float;
-			new_target_copy: in event data port Base_Types::Float;
+			status_change: in event port;
 			bus_access: requires bus access HWConnection;
 	end Aerial;
 
