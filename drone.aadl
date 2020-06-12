@@ -53,7 +53,6 @@ public
 			c26: bus access the_bus -> the_ram.bus_access;
 			c27: bus access the_bus -> the_processor.bus_access;
 			c28: bus access the_bus -> the_drone_rotor.bus_access;
-			--c29: bus access the_bus -> the_controller.bus_access;
 
 		properties
 			Actual_Processor_Binding => (reference (the_processor)) applies to the_controller;
@@ -180,8 +179,8 @@ public
 	end DroneRotor.impl;
 
 	bus HWConnection
-		properties 
-			Transport_layer => (Data_Connection, Event_Connection);
+		properties
+			deployment::transport_api => bsd_sockets;
 	end HWConnection;
 
 	bus implementation HWConnection.impl
@@ -193,6 +192,7 @@ public
 		properties
 			Deployment::Execution_Platform => Native;
 			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 20; 
 	end MainProcessor;
 
 	processor implementation MainProcessor.impl
