@@ -28,10 +28,10 @@ PUBLIC
 	
 	DATA IMPLEMENTATION control.impl
 		SUBCOMPONENTS
-			rotForward: DATA Base_Types::float;
-			rotRight: DATA Base_Types::float;
-			rotLeft: DATA Base_Types::float;
-			rotBackward: DATA Base_Types::float;
+			rotUpperRight: DATA Base_Types::float;
+			rotUpperLeft: DATA Base_Types::float;
+			rotLowerRight: DATA Base_Types::float;
+			rotLowerLeft: DATA Base_Types::float;
 		PROPERTIES
 			Data_Model::Data_Representation => struct;	
 	end control.impl;

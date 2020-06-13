@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <math.h>
 
+float ROTOR_MAX_POWER = 1000;
+
 struct location
 {
   float x;
@@ -10,10 +12,10 @@ struct location
 
 struct control
 {
-  float rotForward;
-  float rotRight;
-  float rotLeft;
-  float rotBackward;
+  float rotUpperRight;
+  float rotUpperLeft;
+  float rotLowerRight;
+  float rotLowerLeft;
 };
 
 float calculateDirection(struct location p1, struct location p2);
@@ -37,10 +39,10 @@ void user_rotorpower_spg(struct control rotor_power_in, struct control *rotor_po
 {
   //prinft("user_rotorpower_spg");
 
-  (*rotor_power_out).rotForward = rotor_power_in.rotForward;
-  (*rotor_power_out).rotRight = rotor_power_in.rotRight;
-  (*rotor_power_out).rotLeft = rotor_power_in.rotLeft;
-  (*rotor_power_out).rotBackward = rotor_power_in.rotBackward;
+  (*rotor_power_out).rotUpperRight = rotor_power_in.rotUpperRight;
+  (*rotor_power_out).rotUpperLeft = rotor_power_in.rotUpperLeft;
+  (*rotor_power_out).rotLowerRight = rotor_power_in.rotLowerRight;
+  (*rotor_power_out).rotLowerLeft = rotor_power_in.rotLowerLeft;
 }
 
 void user_scanarea_spg(bool blockade_in, bool *blockade_out)
@@ -72,20 +74,20 @@ void user_analysedata_spg(struct location location_in, float height_in, float we
 
   if (blockade_in)
   {
-    (*rotor_power_out).rotForward = 0;
-    (*rotor_power_out).rotRight = 0;
-    (*rotor_power_out).rotLeft = 0;
-    (*rotor_power_out).rotBackward = 0;
+    (*rotor_power_out).rotUpperRight = ROTOR_MAX_POWER;
+    (*rotor_power_out).rotUpperLeft = ROTOR_MAX_POWER;
+    (*rotor_power_out).rotLowerRight = ROTOR_MAX_POWER;
+    (*rotor_power_out).rotLowerLeft = ROTOR_MAX_POWER;
   }
 
   if (location_in.x != new_target.x || location_in.y != new_target.y)
   {
     float direction = calculateDirection(location_in, new_target);
 
-    (*rotor_power_out).rotForward = direction;
-    (*rotor_power_out).rotRight = direction;
-    (*rotor_power_out).rotLeft = direction;
-    (*rotor_power_out).rotBackward = direction;
+    (*rotor_power_out).rotUpperRight = direction;
+    (*rotor_power_out).rotUpperLeft = direction;
+    (*rotor_power_out).rotLowerRight = direction;
+    (*rotor_power_out).rotLowerLeft = direction;
   }
 
   if (calculateDistance(location_in, new_target) < 1)
