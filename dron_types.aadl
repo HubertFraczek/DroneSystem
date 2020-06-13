@@ -28,8 +28,8 @@ PUBLIC
 	
 	DATA IMPLEMENTATION control.impl
 		SUBCOMPONENTS
-			rotUpperRight: DATA Base_Types::float;
 			rotUpperLeft: DATA Base_Types::float;
+			rotUpperRight: DATA Base_Types::float;
 			rotLowerRight: DATA Base_Types::float;
 			rotLowerLeft: DATA Base_Types::float;
 		PROPERTIES
