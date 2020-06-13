@@ -67,8 +67,8 @@ end Drone.impl;
 			location_in: in data port dron_types::location.impl;
 			height: in data port Base_Types::Float;
 			location_out: out data port dron_types::location.impl;
-			rotor_power_out: out data port Base_Types::Float;
-			rotor_power_in: in data port Base_Types::Float;
+			rotor_power_out: out data port dron_types::control.impl;
+			rotor_power_in: in data port dron_types::control.impl;
 			status_change: out event data port Base_Types::Integer;
 			blockade_in: in event data port Base_Types::Boolean;
 			new_target: in event data port dron_types::location.impl;
@@ -157,8 +157,8 @@ end Drone.impl;
 
 	device DroneRotor
 		features
-			rotor_power_in: in data port Base_Types::Float;
-			rotor_power_out: out data port Base_Types::Float;
+			rotor_power_in: in data port dron_types::control.impl;
+			rotor_power_out: out data port dron_types::control.impl;
 			bus_access: requires bus access HWConnection;
 	end DroneRotor;
 
@@ -219,8 +219,8 @@ end Drone.impl;
 	
 	subprogram RotorPower_Spg
 		features
-			rotor_power_in: in parameter Base_Types::Float;
-			rotor_power_out: out parameter Base_Types::Float;
+			rotor_power_in: in parameter dron_types::control.impl;
+			rotor_power_out: out parameter dron_types::control.impl;
 		properties
 			source_language => (C);
 			source_name => "user_rotorpower_spg";
@@ -262,8 +262,8 @@ end Drone.impl;
 			location_in: in parameter dron_types::location.impl;
 			height_in: in parameter Base_Types::Float;
 			weight_in: in parameter Base_Types::Float;
-			rotor_power_out: out parameter Base_Types::Float;
-			rotor_power_in: in parameter Base_Types::Float;
+			rotor_power_out: out parameter dron_types::control.impl;
+			rotor_power_in: in parameter dron_types::control.impl;
 			new_target: in parameter dron_types::location.impl;
 			blockade_in: in parameter Base_Types::Boolean;
 			status_out: out parameter Base_Types::Integer;
@@ -324,8 +324,8 @@ end Drone.impl;
 
 	thread RotorPower
 		features
-			rotor_power_in: in data port Base_Types::Float;
-			rotor_power_out: out data port Base_Types::Float;
+			rotor_power_in: in data port dron_types::control.impl;
+			rotor_power_out: out data port dron_types::control.impl;
 	end RotorPower;
 
 	thread implementation RotorPower.impl
@@ -415,8 +415,8 @@ end Drone.impl;
 			location_in: in data port dron_types::location.impl;
 			height_in: in data port Base_Types::Float;
 			weight_in: in data port Base_Types::Float;
-			rotor_power_out: out data port Base_Types::Float;
-			rotor_power_in: in data port Base_Types::Float;
+			rotor_power_out: out data port dron_types::control.impl;
+			rotor_power_in: in data port dron_types::control.impl;
 			blockade_in: in event data port Base_Types::Boolean;
 			status_change: out event data port Base_Types::Integer;
 			new_target: in event data port dron_types::location.impl;
