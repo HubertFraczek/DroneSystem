@@ -2,6 +2,8 @@ package drone
 public
 	with Base_Types;
 	with Deployment;
+	with dron_types;
+	
 
 	--with Data_Model;
 	system Drone
@@ -62,14 +64,14 @@ end Drone.impl;
 	process Controller
 		features
 			weight: in data port Base_Types::Float;
-			location_in: in data port Base_Types::Float;
+			location_in: in data port dron_types::location.impl;
 			height: in data port Base_Types::Float;
-			location_out: out data port Base_Types::Float;
+			location_out: out data port dron_types::location.impl;
 			rotor_power_out: out data port Base_Types::Float;
 			rotor_power_in: in data port Base_Types::Float;
-			status_change: out event data port Base_Types::Float;
-			blockade_in: in event data port Base_Types::Float;
-			new_target: in event data port Base_Types::Float;
+			status_change: out event data port Base_Types::Integer;
+			blockade_in: in event data port Base_Types::Boolean;
+			new_target: in event data port dron_types::location.impl;
 	end Controller;
 
 	process implementation Controller.with_threads
@@ -108,7 +110,7 @@ end Drone.impl;
 -- --------------------
 	device GPS
 		features
-			location_out: out data port Base_Types::Float;
+			location_out: out data port dron_types::location.impl;
 			bus_access: requires bus access HWConnection;
 	end GPS;
 
@@ -135,7 +137,7 @@ end Drone.impl;
 
 	device Radar
 		features
-			blockade: out event data port Base_Types::Float;
+			blockade: out event data port Base_Types::Boolean;
 			bus_access: requires bus access HWConnection;
 	end Radar;
 
@@ -144,9 +146,9 @@ end Drone.impl;
 
 	device Aerial
 		features
-			location_out: in data port Base_Types::Float;
-			new_target: out event data port Base_Types::Float;
-			status_change: in event data port Base_Types::Float;
+			location_out: in data port dron_types::location.impl;
+			new_target: out event data port dron_types::location.impl;
+			status_change: in event data port Base_Types::Integer;
 			bus_access: requires bus access HWConnection;
 	end Aerial;
 
@@ -227,8 +229,8 @@ end Drone.impl;
 	
 	subprogram ScanArea_Spg
 		features
-			blockade_in: in parameter Base_Types::Float;
-			blockade_out: out parameter Base_Types::Float;
+			blockade_in: in parameter Base_Types::Boolean;
+			blockade_out: out parameter Base_Types::Boolean;
 		properties
 			source_language => (C);
 			source_name => "user_scanarea_spg";
@@ -237,8 +239,8 @@ end Drone.impl;
 	
 	subprogram GPSData_Spg
 		features
-			location_in: in parameter Base_Types::Float;
-			location_out: out parameter Base_Types::Float;
+			location_in: in parameter dron_types::location.impl;
+			location_out: out parameter dron_types::location.impl;
 		properties
 			source_language => (C);
 			source_name => "user_gpsdata_spg";
@@ -247,8 +249,8 @@ end Drone.impl;
 	
 	subprogram SetNewTarget_Spg
 		features
-			new_target_in: in parameter Base_Types::Float;
-			new_target_out: out parameter Base_Types::Float;
+			new_target_in: in parameter dron_types::location.impl;
+			new_target_out: out parameter dron_types::location.impl;
 		properties
 			source_language => (C);
 			source_name => "user_setnewtarget_spg";
@@ -257,14 +259,14 @@ end Drone.impl;
 	
 	subprogram AnalyseData_Spg
 		features
-			location_in: in parameter Base_Types::Float;
+			location_in: in parameter dron_types::location.impl;
 			height_in: in parameter Base_Types::Float;
 			weight_in: in parameter Base_Types::Float;
 			rotor_power_out: out parameter Base_Types::Float;
 			rotor_power_in: in parameter Base_Types::Float;
-			new_target: in parameter Base_Types::Float;
-			blockade_in: in parameter Base_Types::Float;
-			status_out: out parameter Base_Types::Float;
+			new_target: in parameter dron_types::location.impl;
+			blockade_in: in parameter Base_Types::Boolean;
+			status_out: out parameter Base_Types::Integer;
 		properties
 			source_language => (C);
 			source_name => "user_analysedata_spg";
@@ -344,8 +346,8 @@ end Drone.impl;
 
 	thread ScanArea
 		features
-			blockade_in: in event data port Base_Types::Float;
-			blockade_out: out event data port Base_Types::Float;
+			blockade_in: in event data port Base_Types::Boolean;
+			blockade_out: out event data port Base_Types::Boolean;
 	end ScanArea;
 
 	thread implementation ScanArea.impl
@@ -366,8 +368,8 @@ end Drone.impl;
 
 	thread GPSData
 		features
-			location_in: in data port Base_Types::Float;
-			location_out: out data port Base_Types::Float;
+			location_in: in data port dron_types::location.impl;
+			location_out: out data port dron_types::location.impl;
 	end GPSData;
 
 	thread implementation GPSData.impl
@@ -388,8 +390,8 @@ end Drone.impl;
 
 	thread SetNewTarget
 		features
-			new_target_in: in event data port Base_Types::Float;
-			new_target_out: out event data port Base_Types::Float;
+			new_target_in: in event data port dron_types::location.impl;
+			new_target_out: out event data port dron_types::location.impl;
 	end SetNewTarget;
 
 	thread implementation SetNewTarget.impl
@@ -410,14 +412,14 @@ end Drone.impl;
 
 	thread AnalyseData
 		features
-			location_in: in data port Base_Types::Float;
+			location_in: in data port dron_types::location.impl;
 			height_in: in data port Base_Types::Float;
 			weight_in: in data port Base_Types::Float;
 			rotor_power_out: out data port Base_Types::Float;
 			rotor_power_in: in data port Base_Types::Float;
-			blockade_in: in event data port Base_Types::Float;
-			status_change: out event data port Base_Types::Float;
-			new_target: in event data port Base_Types::Float;
+			blockade_in: in event data port Base_Types::Boolean;
+			status_change: out event data port Base_Types::Integer;
+			new_target: in event data port dron_types::location.impl;
 	end AnalyseData;
 
 	thread implementation AnalyseData.impl
