@@ -80,7 +80,7 @@ void user_analysedata_spg(struct location location_in, float height_in, float we
         (*rotor_power_out).rotUpperRight = ROTOR_MAX_POWER;
         (*rotor_power_out).rotLowerRight = rotor_power_in.rotLowerRight;
         (*rotor_power_out).rotLowerLeft = rotor_power_in.rotLowerLeft;
-      } else if (direction <= 180) {
+      } else if (direction > 0 && direction <= 180) {
         // turn left
         (*rotor_power_out).rotUpperLeft = ROTOR_MAX_POWER;
         (*rotor_power_out).rotUpperRight = rotor_power_in.rotUpperRight;
