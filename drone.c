@@ -12,7 +12,7 @@ void user_rotorpower_spg(float rotor_power_in, float* rotor_power_out){
     //prinft("user_rotorpower_spg");
 }
 
-void user_scanarea_spg(){
+void user_scanarea_spg(float blockade_in, float* blockade_out){
     //prinft("user_scanarea_spg");
 }
 
@@ -24,6 +24,6 @@ void user_setnewtarget_spg(float new_target_in, float* new_target_out){
     //prinft("user_setnewtarget_spg");
 }
 
-void user_analysedata_spg(float location_in, float height_in, float weight_in, float* rotor_power_out, float rotor_power_in, float new_target){
+void user_analysedata_spg(float location_in, float height_in, float weight_in, float* rotor_power_out, float rotor_power_in, float new_target, float blockade_in, float* status_out){
     //prinft("user_analysedata_spg");
 }

@@ -357,6 +357,9 @@ void thread_radar_deliver
 /*  Get the IN ports values*/
 void* thread_radar_job (void)
 {
+  __po_hi_request_t static blockade_in_request;
+  base_types__float blockade_out_request_var;
+  __po_hi_request_t blockade_out_request;
   __po_hi_int32_t error;
 
   __po_hi_gqueue_init (the_controller_thread_radar_k, __po_hi_thread_radar_nb_ports, __po_hi_thread_radar_queue, __po_hi_thread_radar_fifo_size, __po_hi_thread_radar_first, __po_hi_thread_radar_offsets, __po_hi_thread_radar_woffsets, __po_hi_thread_radar_n_dest, __po_hi_thread_radar_destinations, __po_hi_thread_radar_used_size, __po_hi_thread_radar_history, __po_hi_thread_radar_recent, __po_hi_thread_radar_empties, __po_hi_thread_radar_total_fifo_size);
@@ -377,9 +380,18 @@ void* thread_radar_job (void)
  */
   while (1)
   {
+    /* :: Yes if commentary :: */if (__po_hi_gqueue_get_count (the_controller_thread_radar_k, thread_radar_local_blockade_in))
+    {
+          __po_hi_gqueue_get_value (the_controller_thread_radar_k, thread_radar_local_blockade_in, &(blockade_in_request));
+      __po_hi_gqueue_next_value (the_controller_thread_radar_k, thread_radar_local_blockade_in);
+
+    }
     /*  Call implementation*/
-    drone__scanarea_spg ();
+    drone__scanarea_spg (blockade_in_request.vars.thread_radar_global_blockade_in.thread_radar_global_blockade_in, &(blockade_out_request_var));
     /*  Set the OUT port values*/
+    blockade_out_request.vars.thread_radar_global_blockade_out.thread_radar_global_blockade_out = blockade_out_request_var;
+    blockade_out_request.port = thread_radar_global_blockade_out;
+    __po_hi_gqueue_store_out (the_controller_thread_radar_k, thread_radar_local_blockade_out, &(blockade_out_request));
     /*  Send the OUT ports*/
     error =
      __po_hi_send_output (the_controller_thread_radar_k, thread_radar_global_blockade_out);
@@ -670,9 +682,12 @@ void* thread_analyse_data_job (void)
   __po_hi_request_t static height_in_request;
   __po_hi_request_t static weight_in_request;
   __po_hi_request_t static rotor_power_in_request;
+  __po_hi_request_t static blockade_in_request;
   __po_hi_request_t static new_target_request;
   base_types__float rotor_power_out_request_var;
+  base_types__float status_out_request_var;
   __po_hi_request_t rotor_power_out_request;
+  __po_hi_request_t status_change_request;
   __po_hi_int32_t error;
 
   __po_hi_gqueue_init (the_controller_thread_analyse_data_k, __po_hi_thread_analyse_data_nb_ports, __po_hi_thread_analyse_data_queue, __po_hi_thread_analyse_data_fifo_size, __po_hi_thread_analyse_data_first, __po_hi_thread_analyse_data_offsets, __po_hi_thread_analyse_data_woffsets, __po_hi_thread_analyse_data_n_dest, __po_hi_thread_analyse_data_destinations, __po_hi_thread_analyse_data_used_size, __po_hi_thread_analyse_data_history, __po_hi_thread_analyse_data_recent, __po_hi_thread_analyse_data_empties, __po_hi_thread_analyse_data_total_fifo_size);
@@ -717,6 +732,12 @@ void* thread_analyse_data_job (void)
       __po_hi_gqueue_next_value (the_controller_thread_analyse_data_k, thread_analyse_data_local_rotor_power_in);
 
     }
+    /* :: Yes if commentary :: */if (__po_hi_gqueue_get_count (the_controller_thread_analyse_data_k, thread_analyse_data_local_blockade_in))
+    {
+          __po_hi_gqueue_get_value (the_controller_thread_analyse_data_k, thread_analyse_data_local_blockade_in, &(blockade_in_request));
+      __po_hi_gqueue_next_value (the_controller_thread_analyse_data_k, thread_analyse_data_local_blockade_in);
+
+    }
     /* :: Yes if commentary :: */if (__po_hi_gqueue_get_count (the_controller_thread_analyse_data_k, thread_analyse_data_local_new_target))
     {
           __po_hi_gqueue_get_value (the_controller_thread_analyse_data_k, thread_analyse_data_local_new_target, &(new_target_request));
@@ -724,11 +745,14 @@ void* thread_analyse_data_job (void)
 
     }
     /*  Call implementation*/
-    drone__analysedata_spg (location_in_request.vars.thread_analyse_data_global_location_in.thread_analyse_data_global_location_in, height_in_request.vars.thread_analyse_data_global_height_in.thread_analyse_data_global_height_in, weight_in_request.vars.thread_analyse_data_global_weight_in.thread_analyse_data_global_weight_in, &(rotor_power_out_request_var), rotor_power_in_request.vars.thread_analyse_data_global_rotor_power_in.thread_analyse_data_global_rotor_power_in, new_target_request.vars.thread_analyse_data_global_new_target.thread_analyse_data_global_new_target);
+    drone__analysedata_spg (location_in_request.vars.thread_analyse_data_global_location_in.thread_analyse_data_global_location_in, height_in_request.vars.thread_analyse_data_global_height_in.thread_analyse_data_global_height_in, weight_in_request.vars.thread_analyse_data_global_weight_in.thread_analyse_data_global_weight_in, &(rotor_power_out_request_var), rotor_power_in_request.vars.thread_analyse_data_global_rotor_power_in.thread_analyse_data_global_rotor_power_in, new_target_request.vars.thread_analyse_data_global_new_target.thread_analyse_data_global_new_target, blockade_in_request.vars.thread_analyse_data_global_blockade_in.thread_analyse_data_global_blockade_in, &(status_out_request_var));
     /*  Set the OUT port values*/
     rotor_power_out_request.vars.thread_analyse_data_global_rotor_power_out.thread_analyse_data_global_rotor_power_out = rotor_power_out_request_var;
     rotor_power_out_request.port = thread_analyse_data_global_rotor_power_out;
     __po_hi_gqueue_store_out (the_controller_thread_analyse_data_k, thread_analyse_data_local_rotor_power_out, &(rotor_power_out_request));
+    status_change_request.vars.thread_analyse_data_global_status_change.thread_analyse_data_global_status_change = status_change_request_var;
+    status_change_request.port = thread_analyse_data_global_status_change;
+    __po_hi_gqueue_store_out (the_controller_thread_analyse_data_k, thread_analyse_data_local_status_change, &(status_change_request));
     /*  Send the OUT ports*/
     error =
      __po_hi_send_output (the_controller_thread_analyse_data_k, thread_analyse_data_global_rotor_power_out);

@@ -1,7 +1,6 @@
 #ifndef __OCARINA_GENERATED_REQUEST_H_
 #define __OCARINA_GENERATED_REQUEST_H_ 
 #include <types.h>
-#include <po_hi_types.h>
 #include <deployment.h>
 /*****************************************************/
 
@@ -59,13 +58,13 @@ typedef struct
 
     struct
     {
-      __po_hi_bool_t thread_radar_global_blockade_in;
+      base_types__float thread_radar_global_blockade_in;
 
     } thread_radar_global_blockade_in;
 
     struct
     {
-      __po_hi_bool_t thread_radar_global_blockade_out;
+      base_types__float thread_radar_global_blockade_out;
 
     } thread_radar_global_blockade_out;
 
@@ -125,13 +124,13 @@ typedef struct
 
     struct
     {
-      __po_hi_bool_t thread_analyse_data_global_blockade_in;
+      base_types__float thread_analyse_data_global_blockade_in;
 
     } thread_analyse_data_global_blockade_in;
 
     struct
     {
-      __po_hi_bool_t thread_analyse_data_global_status_change;
+      base_types__float thread_analyse_data_global_status_change;
 
     } thread_analyse_data_global_status_change;
 

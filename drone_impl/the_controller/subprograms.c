@@ -38,11 +38,15 @@ void drone__rotorpower_spg
   user_rotorpower_spg (rotor_power_in, rotor_power_out);
 }
 
-void user_scanarea_spg (void);
-void drone__scanarea_spg (void)
+void user_scanarea_spg 
+    (base_types__float blockade_in,
+    base_types__float* blockade_out);
+void drone__scanarea_spg 
+    (base_types__float blockade_in,
+    base_types__float* blockade_out)
 {
 
-  user_scanarea_spg ();
+  user_scanarea_spg (blockade_in, blockade_out);
 }
 
 void user_gpsdata_spg 
@@ -73,17 +77,21 @@ void user_analysedata_spg
     base_types__float weight_in,
     base_types__float* rotor_power_out,
     base_types__float rotor_power_in,
-    base_types__float new_target);
+    base_types__float new_target,
+    base_types__float blockade_in,
+    base_types__float* status_out);
 void drone__analysedata_spg 
     (base_types__float location_in,
     base_types__float height_in,
     base_types__float weight_in,
     base_types__float* rotor_power_out,
     base_types__float rotor_power_in,
-    base_types__float new_target)
+    base_types__float new_target,
+    base_types__float blockade_in,
+    base_types__float* status_out)
 {
 
-  user_analysedata_spg (location_in, height_in, weight_in, rotor_power_out, rotor_power_in, new_target);
+  user_analysedata_spg (location_in, height_in, weight_in, rotor_power_out, rotor_power_in, new_target, blockade_in, status_out);
 }
 
 

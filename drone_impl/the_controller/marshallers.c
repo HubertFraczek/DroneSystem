@@ -132,6 +132,42 @@ void __po_hi_unmarshall_request_thread_rotor_rotor_power_out
   __po_hi_unmarshall_type_float (&(request->vars.thread_rotor_global_rotor_power_out.thread_rotor_global_rotor_power_out), message, offset);
 }
 
+void __po_hi_marshall_request_thread_radar_blockade_in 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_marshall_type_float (request->vars.thread_radar_global_blockade_in.thread_radar_global_blockade_in, message, offset);
+}
+
+void __po_hi_unmarshall_request_thread_radar_blockade_in 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_unmarshall_type_float (&(request->vars.thread_radar_global_blockade_in.thread_radar_global_blockade_in), message, offset);
+}
+
+void __po_hi_marshall_request_thread_radar_blockade_out 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_marshall_type_float (request->vars.thread_radar_global_blockade_out.thread_radar_global_blockade_out, message, offset);
+}
+
+void __po_hi_unmarshall_request_thread_radar_blockade_out 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_unmarshall_type_float (&(request->vars.thread_radar_global_blockade_out.thread_radar_global_blockade_out), message, offset);
+}
+
 void __po_hi_marshall_request_thread_gps_location_in 
     (__po_hi_request_t* request,
     __po_hi_msg_t* message,
@@ -294,6 +330,42 @@ void __po_hi_unmarshall_request_thread_analyse_data_rotor_power_in
   __po_hi_unmarshall_type_float (&(request->vars.thread_analyse_data_global_rotor_power_in.thread_analyse_data_global_rotor_power_in), message, offset);
 }
 
+void __po_hi_marshall_request_thread_analyse_data_blockade_in 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_marshall_type_float (request->vars.thread_analyse_data_global_blockade_in.thread_analyse_data_global_blockade_in, message, offset);
+}
+
+void __po_hi_unmarshall_request_thread_analyse_data_blockade_in 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_unmarshall_type_float (&(request->vars.thread_analyse_data_global_blockade_in.thread_analyse_data_global_blockade_in), message, offset);
+}
+
+void __po_hi_marshall_request_thread_analyse_data_status_change 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_marshall_type_float (request->vars.thread_analyse_data_global_status_change.thread_analyse_data_global_status_change, message, offset);
+}
+
+void __po_hi_unmarshall_request_thread_analyse_data_status_change 
+    (__po_hi_request_t* request,
+    __po_hi_msg_t* message,
+    __po_hi_uint32_t* offset)
+{
+
+  __po_hi_unmarshall_type_float (&(request->vars.thread_analyse_data_global_status_change.thread_analyse_data_global_status_change), message, offset);
+}
+
 void __po_hi_marshall_request_thread_analyse_data_new_target 
     (__po_hi_request_t* request,
     __po_hi_msg_t* message,
@@ -358,6 +430,18 @@ void __po_hi_marshall_request
 
       break;
     }
+    case thread_radar_global_blockade_in:
+    {
+      __po_hi_marshall_request_thread_radar_blockade_in (request, message, &(offset));
+
+      break;
+    }
+    case thread_radar_global_blockade_out:
+    {
+      __po_hi_marshall_request_thread_radar_blockade_out (request, message, &(offset));
+
+      break;
+    }
     case thread_gps_global_location_in:
     {
       __po_hi_marshall_request_thread_gps_location_in (request, message, &(offset));
@@ -409,6 +493,18 @@ void __po_hi_marshall_request
     case thread_analyse_data_global_rotor_power_in:
     {
       __po_hi_marshall_request_thread_analyse_data_rotor_power_in (request, message, &(offset));
+
+      break;
+    }
+    case thread_analyse_data_global_blockade_in:
+    {
+      __po_hi_marshall_request_thread_analyse_data_blockade_in (request, message, &(offset));
+
+      break;
+    }
+    case thread_analyse_data_global_status_change:
+    {
+      __po_hi_marshall_request_thread_analyse_data_status_change (request, message, &(offset));
 
       break;
     }
@@ -471,6 +567,18 @@ void __po_hi_unmarshall_request
 
       break;
     }
+    case thread_radar_global_blockade_in:
+    {
+      __po_hi_unmarshall_request_thread_radar_blockade_in (request, message, &(offset));
+
+      break;
+    }
+    case thread_radar_global_blockade_out:
+    {
+      __po_hi_unmarshall_request_thread_radar_blockade_out (request, message, &(offset));
+
+      break;
+    }
     case thread_gps_global_location_in:
     {
       __po_hi_unmarshall_request_thread_gps_location_in (request, message, &(offset));
@@ -522,6 +630,18 @@ void __po_hi_unmarshall_request
     case thread_analyse_data_global_rotor_power_in:
     {
       __po_hi_unmarshall_request_thread_analyse_data_rotor_power_in (request, message, &(offset));
+
+      break;
+    }
+    case thread_analyse_data_global_blockade_in:
+    {
+      __po_hi_unmarshall_request_thread_analyse_data_blockade_in (request, message, &(offset));
+
+      break;
+    }
+    case thread_analyse_data_global_status_change:
+    {
+      __po_hi_unmarshall_request_thread_analyse_data_status_change (request, message, &(offset));
 
       break;
     }

@@ -67,7 +67,7 @@ end Drone.impl;
 			location_out: out data port Base_Types::Float;
 			rotor_power_out: out data port Base_Types::Float;
 			rotor_power_in: in data port Base_Types::Float;
-			status_change: out event port;
+			status_change: out event data port Base_Types::Float;
 			blockade_in: in event data port Base_Types::Float;
 			new_target: in event data port Base_Types::Float;
 	end Controller;
@@ -146,7 +146,7 @@ end Drone.impl;
 		features
 			location_out: in data port Base_Types::Float;
 			new_target: out event data port Base_Types::Float;
-			status_change: in event port;
+			status_change: in event data port Base_Types::Float;
 			bus_access: requires bus access HWConnection;
 	end Aerial;
 
@@ -226,6 +226,9 @@ end Drone.impl;
 	end RotorPower_Spg;
 	
 	subprogram ScanArea_Spg
+		features
+			blockade_in: in parameter Base_Types::Float;
+			blockade_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_scanarea_spg";
@@ -260,6 +263,8 @@ end Drone.impl;
 			rotor_power_out: out parameter Base_Types::Float;
 			rotor_power_in: in parameter Base_Types::Float;
 			new_target: in parameter Base_Types::Float;
+			blockade_in: in parameter Base_Types::Float;
+			status_out: out parameter Base_Types::Float;
 		properties
 			source_language => (C);
 			source_name => "user_analysedata_spg";
@@ -339,8 +344,8 @@ end Drone.impl;
 
 	thread ScanArea
 		features
-			blockade_in: in event port;
-			blockade_out: out event port;
+			blockade_in: in event data port Base_Types::Float;
+			blockade_out: out event data port Base_Types::Float;
 	end ScanArea;
 
 	thread implementation ScanArea.impl
@@ -348,6 +353,9 @@ end Drone.impl;
 			Mycalls: {
 				P_Spg: subprogram ScanArea_Spg;
 			};
+		connections 
+			c0: parameter blockade_in -> P_Spg.blockade_in;
+			c1: parameter P_Spg.blockade_out -> blockade_out;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 5;
@@ -407,8 +415,8 @@ end Drone.impl;
 			weight_in: in data port Base_Types::Float;
 			rotor_power_out: out data port Base_Types::Float;
 			rotor_power_in: in data port Base_Types::Float;
-			blockade_in: in event port;
-			status_change: out event port;
+			blockade_in: in event data port Base_Types::Float;
+			status_change: out event data port Base_Types::Float;
 			new_target: in event data port Base_Types::Float;
 	end AnalyseData;
 
@@ -424,6 +432,8 @@ end Drone.impl;
 			c3: parameter rotor_power_in -> P_Spg.rotor_power_in;
 			c4: parameter new_target -> P_Spg.new_target;
 			c5: parameter P_Spg.rotor_power_out -> rotor_power_out;
+			c6: parameter P_Spg.status_out -> status_change;
+			c7: parameter blockade_in -> P_Spg.blockade_in;
 		Properties
 			Dispatch_Protocol => Periodic;
 			Priority => 10;
