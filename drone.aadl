@@ -4,13 +4,88 @@ public
 	with Deployment;
 	with dron_types;
 	
+	
+	system Operator
+	end Operator;
+	
+	system implementation Operator.impl
+	subcomponents
+		the_drone: system Drone.impl;
+		the_operator_controller: process Operator_controller.with_threads;
+	connections
+		Operator_impl_new_connection: port the_drone.current_location -> the_operator_controller.current_location;
+		Operator_impl_new_connection2: port the_drone.status_change -> the_operator_controller.status_change;
+		Operator_impl_new_connection3: port the_operator_controller.new_target -> the_drone.new_target;
+	end Operator.impl;
+	
+	process Operator_controller
+		features
+			current_location: in data port dron_types::location;
+			status_change: in event data port Base_Types::Integer;
+			new_target: out event data port dron_types::location;
+	end Operator_controller;
+	
+	process implementation Operator_controller.with_threads
+		subcomponents
+			thread_new_target_operator: thread NewTargetOperator.impl;
+		connections
+			c1: port current_location -> thread_new_target_operator.current_location;
+			c2: port status_change -> thread_new_target_operator.status_change;
+			c3: port thread_new_target_operator.new_target -> new_target;
+			
+			
+--			c4: port Drone.current_location -> current_location;
+	end Operator_controller.with_threads;
+	
+	thread NewTargetOperator
+		features
+			current_location: in data port dron_types::location;
+			status_change: in data port Base_Types::Integer;
+			new_target: out data port dron_types::location;
+	end NewTargetOperator;
+
+	thread implementation NewTargetOperator.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram SetNewTargetOperator_Spg;
+			};
+		connections
+			c1: parameter current_location -> P_Spg.current_location;
+			c2: parameter status_change -> P_Spg.status_change;
+			c3: parameter P_Spg.new_target -> new_target;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 1;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end NewTargetOperator.impl;
+	
+	subprogram SetNewTargetOperator_Spg
+		features
+			current_location: in parameter dron_types::location;
+			status_change: in parameter Base_Types::Integer;
+			new_target: out parameter dron_types::location;
+		properties
+			source_language => (C);
+			source_name => "set_new_target_operator_spg";
+			source_text => ("drone.c");
+	end SetNewTargetOperator_Spg;
+	
+	
+	
+	
+	
+	
+	
+	
 
 	--with Data_Model;
 	system Drone
-		--features
-		--current_location: out data port;
-		--status_change: out event port;
-		--new_target: in event data port;
+		features
+			current_location: out data port dron_types::location;
+			status_change: out event data port Base_Types::Integer;
+			new_target: in event data port dron_types::location;
 	end Drone;
 
 
