@@ -108,7 +108,6 @@ float calculateDistance(struct location p1, struct location p2) {
   return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
 
-
-void set_new_target_operator_spg(struct location current_location, int status_change, stuct location* new_target) {
+void set_new_target_operator_spg(struct location current_location, int status_change, struct location* new_target) {
 
 }

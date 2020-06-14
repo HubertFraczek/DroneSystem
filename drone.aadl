@@ -3,26 +3,45 @@ public
 	with Base_Types;
 	with Deployment;
 	with dron_types;
-	
+
+-- --------------------
+--      Operator     --
+-- --------------------
 	
 	system Operator
 	end Operator;
 	
 	system implementation Operator.impl
-	subcomponents
-		the_drone: system Drone.impl;
-		the_operator_controller: process Operator_controller.with_threads;
-	connections
-		Operator_impl_new_connection: port the_drone.current_location -> the_operator_controller.current_location;
-		Operator_impl_new_connection2: port the_drone.status_change -> the_operator_controller.status_change;
-		Operator_impl_new_connection3: port the_operator_controller.new_target -> the_drone.new_target;
+		subcomponents
+			the_drone: system Drone.impl;
+			the_operator_controller: process Operator_controller.with_threads;
+			the_operator_bus: bus HWConnectionOperator.impl;
+			the_operator_ram: memory RamOperator.impl;
+			the_operator_processor: processor OperatorProcessor.impl;
+		connections
+			Operator_impl_new_connection: port the_drone.current_location -> the_operator_controller.current_location;
+			Operator_impl_new_connection2: port the_drone.status_change -> the_operator_controller.status_change;
+			Operator_impl_new_connection3: port the_operator_controller.new_target -> the_drone.new_target;
+			
+			c21: bus access the_operator_bus -> the_operator_ram.bus_access;
+			c22: bus access the_operator_bus -> the_operator_processor.bus_access;
+			c23: bus access the_operator_bus -> the_drone.bus_access;
+		properties
+			Actual_Processor_Binding => (reference (the_operator_processor)) applies to the_operator_controller;
+			Actual_Memory_Binding => (reference (the_operator_ram)) applies to the_operator_controller;
+			Actual_Connection_Binding => (reference (the_operator_bus)) applies to Operator_impl_new_connection;
+			Actual_Connection_Binding => (reference (the_operator_bus)) applies to Operator_impl_new_connection2;
+			Actual_Connection_Binding => (reference (the_operator_bus)) applies to Operator_impl_new_connection3;
+			Actual_Connection_Binding => (reference (the_operator_bus)) applies to c21;
+			Actual_Connection_Binding => (reference (the_operator_bus)) applies to c22;
+			Actual_Connection_Binding => (reference (the_operator_bus)) applies to c23;
 	end Operator.impl;
 	
 	process Operator_controller
 		features
-			current_location: in data port dron_types::location;
+			current_location: in data port dron_types::location.impl;
 			status_change: in event data port Base_Types::Integer;
-			new_target: out event data port dron_types::location;
+			new_target: out event data port dron_types::location.impl;
 	end Operator_controller;
 	
 	process implementation Operator_controller.with_threads
@@ -32,16 +51,63 @@ public
 			c1: port current_location -> thread_new_target_operator.current_location;
 			c2: port status_change -> thread_new_target_operator.status_change;
 			c3: port thread_new_target_operator.new_target -> new_target;
-			
-			
---			c4: port Drone.current_location -> current_location;
+		properties
+			Timing => immediate applies to c1, c2, c3;
 	end Operator_controller.with_threads;
 	
+-- --------------------
+--      Devices      --
+-- --------------------
+	bus HWConnectionOperator
+		properties
+			deployment::transport_api => bsd_sockets;
+	end HWConnectionOperator;
+
+	bus implementation HWConnectionOperator.impl
+	end HWConnectionOperator.impl;
+
+	processor OperatorProcessor
+		features
+			bus_access: requires bus access HWConnectionOperator.impl;
+		properties
+			Deployment::Execution_Platform => Native;
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 20; 
+	end OperatorProcessor;
+
+	processor implementation OperatorProcessor.impl
+	end OperatorProcessor.impl;
+
+	memory RamOperator
+		features
+			bus_access: requires bus access HWConnectionOperator.impl;
+	end RamOperator;
+
+	memory implementation RamOperator.impl
+	end RamOperator.impl;
+	
+-- --------------------
+--      Subprograms  --
+-- --------------------
+	subprogram SetNewTargetOperator_Spg
+		features
+			current_location: in parameter dron_types::location.impl;
+			status_change: in parameter Base_Types::Integer;
+			new_target: out parameter dron_types::location.impl;
+		properties
+			source_language => (C);
+			source_name => "set_new_target_operator_spg";
+			source_text => ("drone.c");
+	end SetNewTargetOperator_Spg;
+	
+-- --------------------
+--      Threads      --
+-- --------------------
 	thread NewTargetOperator
 		features
-			current_location: in data port dron_types::location;
+			current_location: in data port dron_types::location.impl;
 			status_change: in data port Base_Types::Integer;
-			new_target: out data port dron_types::location;
+			new_target: out data port dron_types::location.impl;
 	end NewTargetOperator;
 
 	thread implementation NewTargetOperator.impl
@@ -61,16 +127,6 @@ public
 			Deadline => 200ms;
 	end NewTargetOperator.impl;
 	
-	subprogram SetNewTargetOperator_Spg
-		features
-			current_location: in parameter dron_types::location;
-			status_change: in parameter Base_Types::Integer;
-			new_target: out parameter dron_types::location;
-		properties
-			source_language => (C);
-			source_name => "set_new_target_operator_spg";
-			source_text => ("drone.c");
-	end SetNewTargetOperator_Spg;
 	
 	
 	
@@ -83,9 +139,10 @@ public
 	--with Data_Model;
 	system Drone
 		features
-			current_location: out data port dron_types::location;
+			current_location: out data port dron_types::location.impl;
 			status_change: out event data port Base_Types::Integer;
-			new_target: in event data port dron_types::location;
+			new_target: in event data port dron_types::location.impl;
+			bus_access: requires bus access HWConnectionOperator.impl;
 	end Drone;
 
 
@@ -112,6 +169,9 @@ public
 		c7: port the_controller.status_change -> the_aerial.status_change;
 		c11: port the_controller.rotor_power_out -> the_drone_rotor.rotor_power_in;
 		c12: port the_drone_rotor.rotor_power_out -> the_controller.rotor_power_in;
+		c13: port the_aerial.current_location -> current_location;
+		c14: port the_aerial.status_change_operator -> status_change;
+		c15: port new_target -> the_aerial.new_target_operator;
 
 		c21: bus access the_bus -> the_GPS.bus_access;
 		c22: bus access the_bus -> the_weight_sensor.bus_access;
@@ -134,6 +194,9 @@ public
 		Actual_Connection_Binding => (reference (the_bus)) applies to c7;
 		Actual_Connection_Binding => (reference (the_bus)) applies to c11;
 		Actual_Connection_Binding => (reference (the_bus)) applies to c12;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c13;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c14;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c15;
 end Drone.impl;
 
 	process Controller
@@ -225,6 +288,9 @@ end Drone.impl;
 			new_target: out event data port dron_types::location.impl;
 			status_change: in event data port Base_Types::Integer;
 			bus_access: requires bus access HWConnection;
+			new_target_operator: in event data port dron_types::location.impl;
+			status_change_operator: out event data port Base_Types::Integer;
+			current_location: out data port dron_types::location.impl;
 	end Aerial;
 
 	device implementation Aerial.impl
