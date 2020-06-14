@@ -34,7 +34,7 @@ public
 		c5: port the_aerial.new_target -> the_controller.new_target;
 		c6: port the_radar.blockade -> the_controller.blockade_in;
 		c3: port the_controller.location_out -> the_aerial.location_out;
-		c7: port the_controller.status_change -> the_aerial.status_change;
+--		c7: port the_controller.status_change -> the_aerial.status_change;
 		c11: port the_controller.rotor_power_out -> the_drone_rotor.rotor_power_in;
 		c12: port the_drone_rotor.rotor_power_out -> the_controller.rotor_power_in;
 
@@ -56,7 +56,7 @@ public
 		Actual_Connection_Binding => (reference (the_bus)) applies to c4;
 		Actual_Connection_Binding => (reference (the_bus)) applies to c5;
 		Actual_Connection_Binding => (reference (the_bus)) applies to c6;
-		Actual_Connection_Binding => (reference (the_bus)) applies to c7;
+--		Actual_Connection_Binding => (reference (the_bus)) applies to c7;
 		Actual_Connection_Binding => (reference (the_bus)) applies to c11;
 		Actual_Connection_Binding => (reference (the_bus)) applies to c12;
 end Drone.impl;
@@ -69,7 +69,7 @@ end Drone.impl;
 			location_out: out data port dron_types::location.impl;
 			rotor_power_out: out data port dron_types::control.impl;
 			rotor_power_in: in data port dron_types::control.impl;
-			status_change: out event data port Base_Types::Integer;
+--			status_change: out event data port Base_Types::Integer;
 			blockade_in: in event data port Base_Types::Boolean;
 			new_target: in event data port dron_types::location.impl;
 	end Controller;
@@ -91,7 +91,7 @@ end Drone.impl;
 			c4: port blockade_in -> thread_radar.blockade_in;
 
 			c6: port thread_gps.location_out -> location_out;
-			c7: port thread_analyse_data.status_change -> status_change;
+--			c7: port thread_analyse_data.status_change -> status_change;
 			c8: port new_target -> thread_set_target.new_target_in;
 			c9: port thread_set_target.new_target_out -> thread_analyse_data.new_target;
 			c10: port thread_weight.weight_out -> thread_analyse_data.weight_in;
@@ -102,7 +102,7 @@ end Drone.impl;
 			c15: port thread_analyse_data.rotor_power_out -> rotor_power_out;
 			c16: port rotor_power_in -> thread_rotor.rotor_power_in;
 		properties
-			Timing => immediate applies to c1, c2, c3, c4, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16;
+			Timing => immediate applies to c1, c2, c3, c4, c6, c8, c9, c10, c11, c12, c13, c14, c15, c16;
 	end Controller.with_threads;
 
 -- --------------------
@@ -148,7 +148,7 @@ end Drone.impl;
 		features
 			location_out: in data port dron_types::location.impl;
 			new_target: out event data port dron_types::location.impl;
-			status_change: in event data port Base_Types::Integer;
+--			status_change: in event data port Base_Types::Integer;
 			bus_access: requires bus access HWConnection;
 	end Aerial;
 
@@ -266,7 +266,7 @@ end Drone.impl;
 			rotor_power_in: in parameter dron_types::control.impl;
 			new_target: in parameter dron_types::location.impl;
 			blockade_in: in parameter Base_Types::Boolean;
-			status_out: out parameter Base_Types::Integer;
+--			status_out: out parameter Base_Types::Integer;
 		properties
 			source_language => (C);
 			source_name => "user_analysedata_spg";
@@ -418,7 +418,7 @@ end Drone.impl;
 			rotor_power_out: out data port dron_types::control.impl;
 			rotor_power_in: in data port dron_types::control.impl;
 			blockade_in: in event data port Base_Types::Boolean;
-			status_change: out event data port Base_Types::Integer;
+--			status_change: out event data port Base_Types::Integer;
 			new_target: in event data port dron_types::location.impl;
 	end AnalyseData;
 
@@ -434,7 +434,7 @@ end Drone.impl;
 			c3: parameter rotor_power_in -> P_Spg.rotor_power_in;
 			c4: parameter new_target -> P_Spg.new_target;
 			c5: parameter P_Spg.rotor_power_out -> rotor_power_out;
-			c6: parameter P_Spg.status_out -> status_change;
+--			c6: parameter P_Spg.status_out -> status_change;
 			c7: parameter blockade_in -> P_Spg.blockade_in;
 		Properties
 			Dispatch_Protocol => Periodic;
