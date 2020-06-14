@@ -1,35 +1,31 @@
 package drone
 public
 	with Base_Types;
-	with Data_Model;
+	with Deployment;
+	with dron_types;
 	
-system Drone
-	--features
+
+	--with Data_Model;
+	system Drone
+		--features
 		--current_location: out data port;
 		--status_change: out event port;
 		--new_target: in event data port;
-end Drone;
-
-system Operator
-	features
-		new_target: out event data port;
-		current_location: in data port;
-		status_change: in event port;
-end Operator;
+	end Drone;
 
 
-system implementation Drone.impl
+	system implementation Drone.impl
 	subcomponents
-		the_GPS: device GPS;
-		the_weight_sensor: device WeightSensor;
-		the_height_sensor: device HeightSensor;
-		the_radar: device Radar;
-		the_aerial: device Aerial;
-		the_drone_rotor: device DroneRotor;
-		the_operator: system Operator;
+		the_GPS: device GPS.impl;
+		the_weight_sensor: device WeightSensor.impl;
+		the_height_sensor: device HeightSensor.impl;
+		the_radar: device Radar.impl;
+		the_aerial: device Aerial.impl;
+		the_drone_rotor: device DroneRotor.impl;
+
 		the_controller: process Controller.with_threads;
 		the_bus: bus HWConnection.impl;
-		the_ram: memory Ram;
+		the_ram: memory Ram.impl;
 		the_processor: processor MainProcessor.impl;
 	connections
 		c1: port the_weight_sensor.weight -> the_controller.weight;
@@ -39,13 +35,9 @@ system implementation Drone.impl
 		c6: port the_radar.blockade -> the_controller.blockade_in;
 		c3: port the_controller.location_out -> the_aerial.location_out;
 		c7: port the_controller.status_change -> the_aerial.status_change;
-		c8: port the_operator.new_target -> the_aerial.new_target_copy;
-		c9: port the_aerial.current_location -> the_operator.current_location;
-		c10: port the_aerial.status_change_copy -> the_operator.status_change;
 		c11: port the_controller.rotor_power_out -> the_drone_rotor.rotor_power_in;
 		c12: port the_drone_rotor.rotor_power_out -> the_controller.rotor_power_in;
-		
-		
+
 		c21: bus access the_bus -> the_GPS.bus_access;
 		c22: bus access the_bus -> the_weight_sensor.bus_access;
 		c23: bus access the_bus -> the_height_sensor.bus_access;
@@ -54,208 +46,403 @@ system implementation Drone.impl
 		c26: bus access the_bus -> the_ram.bus_access;
 		c27: bus access the_bus -> the_processor.bus_access;
 		c28: bus access the_bus -> the_drone_rotor.bus_access;
+
+	properties
+		Actual_Processor_Binding => (reference (the_processor)) applies to the_controller;
+		Actual_Memory_Binding => (reference (the_ram)) applies to the_controller;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c1;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c2;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c3;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c4;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c5;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c6;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c7;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c11;
+		Actual_Connection_Binding => (reference (the_bus)) applies to c12;
 end Drone.impl;
 
-process Controller
-	features
-		weight: in data port Base_Types::Float;
-		location_in: in data port;
-		height: in data port Base_Types::Float;
-		location_out: out data port;
-		status_change: out event port;
-		blockade_in: in event data port;
-		new_target: in event data port;
-		rotor_power_out: out data port Base_Types::Float;
-		rotor_power_in: in data port Base_Types::Float;
-end Controller;
+	process Controller
+		features
+			weight: in data port Base_Types::Float;
+			location_in: in data port dron_types::location.impl;
+			height: in data port Base_Types::Float;
+			location_out: out data port dron_types::location.impl;
+			rotor_power_out: out data port dron_types::control.impl;
+			rotor_power_in: in data port dron_types::control.impl;
+			status_change: out event data port Base_Types::Integer;
+			blockade_in: in event data port Base_Types::Boolean;
+			new_target: in event data port dron_types::location.impl;
+	end Controller;
 
-process implementation Controller.with_threads
-	subcomponents
-		thread_weight: thread ReadWeight.impl;
-		thread_height: thread ReadHeight.impl;
-		thread_rotor: thread RotorPower.impl;
-		thread_radar: thread ScanArea.impl;
-		thread_gps: thread GPSData.impl; 
-		thread_set_target: thread SetNewTarget.impl;
-		thread_analyse_data: thread AnalyseData.impl;
-	connections
-		c1: port weight -> thread_weight.weight_in;
-		c2: port height -> thread_height.height_in;
-		c3: port location_in -> thread_gps.location_in;
-		c4: port blockade_in -> thread_radar.blockade_in;
+	process implementation Controller.with_threads
 		
-		c6: port thread_gps.location_out -> location_out;
-		c7: port thread_analyse_data.status_change -> status_change;
-		c8: port new_target -> thread_set_target.new_target_in;
-		c9: port thread_set_target.new_target_out -> thread_analyse_data.new_target;
-		c10: port thread_weight.weight_out -> thread_analyse_data.weight_in;
-		c11: port thread_height.height_out -> thread_analyse_data.height_in;
-		c12: port thread_radar.blockade_out -> thread_analyse_data.blockade_in;
-		c13: port thread_gps.location_out -> thread_analyse_data.location_in;
-		c14: port thread_rotor.rotor_power_out -> thread_analyse_data.rotor_power_in;
-		c15: port thread_analyse_data.rotor_power_out -> rotor_power_out;
-		c16: port rotor_power_in -> thread_rotor.rotor_power_in;
-		
-end Controller.with_threads;
+		subcomponents
+			thread_weight: thread ReadWeight.impl;
+			thread_height: thread ReadHeight.impl;
+			thread_rotor: thread RotorPower.impl;
+			thread_radar: thread ScanArea.impl;
+			thread_gps: thread GPSData.impl;
+			thread_set_target: thread SetNewTarget.impl;
+			thread_analyse_data: thread AnalyseData.impl;
+		connections
+			c1: port weight -> thread_weight.weight_in;
+			c2: port height -> thread_height.height_in;
+			c3: port location_in -> thread_gps.location_in;
+			c4: port blockade_in -> thread_radar.blockade_in;
+
+			c6: port thread_gps.location_out -> location_out;
+			c7: port thread_analyse_data.status_change -> status_change;
+			c8: port new_target -> thread_set_target.new_target_in;
+			c9: port thread_set_target.new_target_out -> thread_analyse_data.new_target;
+			c10: port thread_weight.weight_out -> thread_analyse_data.weight_in;
+			c11: port thread_height.height_out -> thread_analyse_data.height_in;
+			c12: port thread_radar.blockade_out -> thread_analyse_data.blockade_in;
+			c13: port thread_gps.location_out -> thread_analyse_data.location_in;
+			c14: port thread_rotor.rotor_power_out -> thread_analyse_data.rotor_power_in;
+			c15: port thread_analyse_data.rotor_power_out -> rotor_power_out;
+			c16: port rotor_power_in -> thread_rotor.rotor_power_in;
+		properties
+			Timing => immediate applies to c1, c2, c3, c4, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16;
+	end Controller.with_threads;
 
 -- --------------------
 --      Devices      --
 -- --------------------
+	device GPS
+		features
+			location_out: out data port dron_types::location.impl;
+			bus_access: requires bus access HWConnection;
+	end GPS;
 
-device GPS
-	features
-		location_out: out data port;
-		bus_access: requires bus access HWConnection;
-end GPS;
+	device implementation GPS.impl
+	end GPS.impl;
+
+	device WeightSensor
+		features
+			weight: out data port Base_Types::Float;
+			bus_access: requires bus access HWConnection;
+	end WeightSensor;
+
+	device implementation WeightSensor.impl
+	end WeightSensor.impl;
+
+	device HeightSensor
+		features
+			height: out data port Base_Types::Float;
+			bus_access: requires bus access HWConnection;
+	end HeightSensor;
+
+	device implementation HeightSensor.impl
+	end HeightSensor.impl;
+
+	device Radar
+		features
+			blockade: out event data port Base_Types::Boolean;
+			bus_access: requires bus access HWConnection;
+	end Radar;
+
+	device implementation Radar.impl
+	end Radar.impl;
+
+	device Aerial
+		features
+			location_out: in data port dron_types::location.impl;
+			new_target: out event data port dron_types::location.impl;
+			status_change: in event data port Base_Types::Integer;
+			bus_access: requires bus access HWConnection;
+	end Aerial;
+
+	device implementation Aerial.impl
+	end Aerial.impl;
+
+	device DroneRotor
+		features
+			rotor_power_in: in data port dron_types::control.impl;
+			rotor_power_out: out data port dron_types::control.impl;
+			bus_access: requires bus access HWConnection;
+	end DroneRotor;
+
+	device implementation DroneRotor.impl
+	end DroneRotor.impl;
+
+	bus HWConnection
+		properties
+			deployment::transport_api => bsd_sockets;
+	end HWConnection;
+
+	bus implementation HWConnection.impl
+	end HWConnection.impl;
+
+	processor MainProcessor
+		features
+			bus_access: requires bus access HWConnection.impl;
+		properties
+			Deployment::Execution_Platform => Native;
+			Scheduling_Protocol => (POSIX_1003_HIGHEST_PRIORITY_FIRST_PROTOCOL);
+			Priority_Range => 1 .. 20; 
+	end MainProcessor;
+
+	processor implementation MainProcessor.impl
+	end MainProcessor.impl;
+
+	memory Ram
+		features
+			bus_access: requires bus access HWConnection.impl;
+	end Ram;
+
+	memory implementation Ram.impl
+	end Ram.impl;
 	
-device implementation GPS.impl
-end GPS.impl;
+-- --------------------
+--    Subprograms    --
+-- --------------------
+	subprogram ReadWeight_Spg
+		features
+			weight_in: in parameter Base_Types::Float;
+			weight_out: out parameter Base_Types::Float;
+		properties
+			source_language => (C);
+			source_name => "user_readweight_spg";
+			source_text => ("drone.c");
+	end ReadWeight_Spg;
 
 
-device WeightSensor	
-	features
-		weight: out data port Base_Types::Float;
-		bus_access: requires bus access HWConnection;
-end WeightSensor;
+	subprogram ReadHeight_Spg
+		features
+			height_in: in parameter Base_Types::Float;
+			height_out: out parameter Base_Types::Float;
+		properties
+			source_language => (C);
+			source_name => "user_readheight_spg";
+			source_text => ("drone.c");
+	end ReadHeight_Spg;
 	
-device implementation WeightSensor.impl
-end WeightSensor.impl;
-
-
-device HeightSensor	
-	features
-		height: out data port Base_Types::Float;
-		bus_access: requires bus access HWConnection;
-end HeightSensor;
+	subprogram RotorPower_Spg
+		features
+			rotor_power_in: in parameter dron_types::control.impl;
+			rotor_power_out: out parameter dron_types::control.impl;
+		properties
+			source_language => (C);
+			source_name => "user_rotorpower_spg";
+			source_text => ("drone.c");
+	end RotorPower_Spg;
 	
-device implementation HeightSensor.impl
-end HeightSensor.impl;
-
-
-device Radar	
-	features
-		blockade: out event data port;
-		bus_access: requires bus access HWConnection;
-end Radar;
+	subprogram ScanArea_Spg
+		features
+			blockade_in: in parameter Base_Types::Boolean;
+			blockade_out: out parameter Base_Types::Boolean;
+		properties
+			source_language => (C);
+			source_name => "user_scanarea_spg";
+			source_text => ("drone.c");
+	end ScanArea_Spg;
 	
-device implementation Radar.impl
-end Radar.impl;
-
-device Aerial
-	features
-		location_out: in data port;
-		current_location: out data port;
-		status_change: in event port;
-		status_change_copy: out event port;
-		new_target: out event data port;
-		new_target_copy: in event data port;
-		bus_access: requires bus access HWConnection;
-end Aerial;
+	subprogram GPSData_Spg
+		features
+			location_in: in parameter dron_types::location.impl;
+			location_out: out parameter dron_types::location.impl;
+		properties
+			source_language => (C);
+			source_name => "user_gpsdata_spg";
+			source_text => ("drone.c");
+	end GPSData_Spg;
 	
-device implementation Aerial.impl
-end Aerial.impl;
-
-device DroneRotor
-  features
-    rotor_power_in : in data port Base_Types::Float;
-    rotor_power_out: out data port Base_Types::Float;
-    bus_access : requires bus access HWConnection;
-end DroneRotor;
-
-device implementation DroneRotor.impl
-end DroneRotor.impl;
-
-bus HWConnection
-end HWConnection;
+	subprogram SetNewTarget_Spg
+		features
+			new_target_in: in parameter dron_types::location.impl;
+			new_target_out: out parameter dron_types::location.impl;
+		properties
+			source_language => (C);
+			source_name => "user_setnewtarget_spg";
+			source_text => ("drone.c");
+	end SetNewTarget_Spg;
 	
-bus implementation HWConnection.impl
-end HWConnection.impl;
-
-processor MainProcessor
-	features
-		bus_access: requires bus access HWConnection.impl;
-end MainProcessor;
+	subprogram AnalyseData_Spg
+		features
+			location_in: in parameter dron_types::location.impl;
+			height_in: in parameter Base_Types::Float;
+			weight_in: in parameter Base_Types::Float;
+			rotor_power_out: out parameter dron_types::control.impl;
+			rotor_power_in: in parameter dron_types::control.impl;
+			new_target: in parameter dron_types::location.impl;
+			blockade_in: in parameter Base_Types::Boolean;
+			status_out: out parameter Base_Types::Integer;
+		properties
+			source_language => (C);
+			source_name => "user_analysedata_spg";
+			source_text => ("drone.c");
+	end AnalyseData_Spg;
 	
-processor implementation MainProcessor.impl
-end MainProcessor.impl;
-
-memory Ram
-	features
-		bus_access: requires bus access HWConnection.impl;
-end Ram;
+	
 
 -- --------------------
 --      Threads      --
 -- --------------------
+	thread ReadWeight
+		features
+			weight_in: in data port Base_Types::Float;
+			weight_out: out data port Base_Types::Float;
+	end ReadWeight;
 
-thread ReadWeight
-	features
-		weight_in: in data port Base_Types::Float;
-		weight_out: out data port Base_Types::Float;
-end ReadWeight;
+	thread implementation ReadWeight.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram ReadWeight_Spg;
+			};
+		connections
+			c0: parameter weight_in -> P_Spg.weight_in;
+			c1: parameter P_Spg.weight_out -> weight_out;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 1;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end ReadWeight.impl;
 
-thread implementation ReadWeight.impl
-end ReadWeight.impl;
+	thread ReadHeight
+		features
+			height_in: in data port Base_Types::Float;
+			height_out: out data port Base_Types::Float;
+	end ReadHeight;
 
-thread ReadHeight
-	features
-		height_in: in data port Base_Types::Float;
-		height_out: out data port Base_Types::Float;
-end ReadHeight;
+	thread implementation ReadHeight.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram ReadHeight_Spg;
+			};
+		connections
+			c0: parameter height_in -> P_Spg.height_in;
+			c1: parameter P_Spg.height_out -> height_out;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 3;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end ReadHeight.impl;
 
-thread implementation ReadHeight.impl
-end ReadHeight.impl;
+	thread RotorPower
+		features
+			rotor_power_in: in data port dron_types::control.impl;
+			rotor_power_out: out data port dron_types::control.impl;
+	end RotorPower;
 
-thread RotorPower
-	features
-		rotor_power_in: in data port Base_Types::Float;
-		rotor_power_out: out data port Base_Types::Float;
-end RotorPower;
+	thread implementation RotorPower.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram RotorPower_Spg;
+			};
+		connections
+			c0: parameter rotor_power_in -> P_Spg.rotor_power_in;
+			c1: parameter P_Spg.rotor_power_out -> rotor_power_out;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 7;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end RotorPower.impl;
 
-thread implementation RotorPower.impl
-end RotorPower.impl;
+	thread ScanArea
+		features
+			blockade_in: in event data port Base_Types::Boolean;
+			blockade_out: out event data port Base_Types::Boolean;
+	end ScanArea;
 
-thread ScanArea
-	features
-		blockade_in: in event port;
-		blockade_out: out event port;
-end ScanArea;
+	thread implementation ScanArea.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram ScanArea_Spg;
+			};
+		connections 
+			c0: parameter blockade_in -> P_Spg.blockade_in;
+			c1: parameter P_Spg.blockade_out -> blockade_out;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 5;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end ScanArea.impl;
 
-thread implementation ScanArea.impl
-end ScanArea.impl;
+	thread GPSData
+		features
+			location_in: in data port dron_types::location.impl;
+			location_out: out data port dron_types::location.impl;
+	end GPSData;
 
-thread GPSData
-	features
-		location_in: in data port;
-		location_out: out data port;
-end GPSData;
+	thread implementation GPSData.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram GPSData_Spg;
+			};
+		connections
+			c0: parameter location_in -> P_Spg.location_in;
+			c1: parameter P_Spg.location_out -> location_out;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 2;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end GPSData.impl;
 
-thread implementation GPSData.impl
-end GPSData.impl;
+	thread SetNewTarget
+		features
+			new_target_in: in event data port dron_types::location.impl;
+			new_target_out: out event data port dron_types::location.impl;
+	end SetNewTarget;
 
-thread SetNewTarget
-	features
-		new_target_in: in event data port;
-		new_target_out: out event data port;
-end SetNewTarget;
+	thread implementation SetNewTarget.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram SetNewTarget_Spg;
+			};
+		connections
+			c0: parameter new_target_in -> P_Spg.new_target_in;
+			c1: parameter P_Spg.new_target_out -> new_target_out;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 8;
+			Compute_Execution_Time => 1ms .. 5ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end SetNewTarget.impl;
 
-thread implementation SetNewTarget.impl
-end SetNewTarget.impl;
+	thread AnalyseData
+		features
+			location_in: in data port dron_types::location.impl;
+			height_in: in data port Base_Types::Float;
+			weight_in: in data port Base_Types::Float;
+			rotor_power_out: out data port dron_types::control.impl;
+			rotor_power_in: in data port dron_types::control.impl;
+			blockade_in: in event data port Base_Types::Boolean;
+			status_change: out event data port Base_Types::Integer;
+			new_target: in event data port dron_types::location.impl;
+	end AnalyseData;
 
-thread AnalyseData
-	features
-		location_in: in data port;
-		blockade_in: in event port;
-		height_in: in data port Base_Types::Float;
-		weight_in: in data port Base_Types::Float;
-		rotor_power_out: out data port Base_Types::Float; 
-		rotor_power_in: in data port Base_Types::Float; 
-		status_change: out event port;
-		new_target: in event data port;
-end AnalyseData;
-
-thread implementation AnalyseData.impl
-end AnalyseData.impl;
+	thread implementation AnalyseData.impl
+		calls
+			Mycalls: {
+				P_Spg: subprogram AnalyseData_Spg;
+			};
+		connections
+			c0: parameter location_in -> P_Spg.location_in;
+			c1: parameter height_in -> P_Spg.height_in;
+			c2: parameter weight_in -> P_Spg.weight_in;
+			c3: parameter rotor_power_in -> P_Spg.rotor_power_in;
+			c4: parameter new_target -> P_Spg.new_target;
+			c5: parameter P_Spg.rotor_power_out -> rotor_power_out;
+			c6: parameter P_Spg.status_out -> status_change;
+			c7: parameter blockade_in -> P_Spg.blockade_in;
+		Properties
+			Dispatch_Protocol => Periodic;
+			Priority => 10;
+			Compute_Execution_Time => 50ms .. 100ms;
+			Period => 200ms;
+			Deadline => 200ms;
+	end AnalyseData.impl;
 
 end drone;
 
