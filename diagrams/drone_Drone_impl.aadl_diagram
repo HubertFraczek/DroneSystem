@@ -257,17 +257,26 @@
         <point x="594.0" y="98.0"/>
       </bendpoints>
     </element>
-    <element uuid="a837060b-ce7b-49fe-911b-850000b536a2" manual="true">
-      <element uuid="b80ef540-2591-49f9-a2d0-164bfbd1b4fa" manual="true">
-        <bo>
-          <seg>tag</seg>
-          <seg>unidirectional</seg>
-        </bo>
-      </element>
+    <element uuid="e08f9f9b-3b39-4804-8044-57ac14e36d6f" manual="true" dockArea="right">
       <bo>
-        <seg>connection</seg>
-        <seg>c7</seg>
+        <seg>feature</seg>
+        <seg>current_location</seg>
       </bo>
+      <position x="1856.0" y="205.0"/>
+    </element>
+    <element uuid="c7e534ec-a883-49f0-a9db-4ce1946576f2" manual="true" dockArea="right">
+      <bo>
+        <seg>feature</seg>
+        <seg>new_target</seg>
+      </bo>
+      <position x="1886.0" y="385.0"/>
+    </element>
+    <element uuid="fba354ba-a996-44dd-ae75-d8d5ccb07cb3" manual="true" dockArea="right">
+      <bo>
+        <seg>feature</seg>
+        <seg>status_change</seg>
+      </bo>
+      <position x="1866.0" y="93.0"/>
     </element>
     <element uuid="c8c7f93f-8191-4f55-821b-390b22c939f9" manual="true">
       <element uuid="3a1827b6-f4aa-4174-ad7e-310d33663bc5" manual="true" dockArea="left">
@@ -359,8 +368,8 @@
           <point x="784.0" y="1050.0"/>
         </bendpoints>
       </element>
-      <element uuid="25da9dbe-cb21-47f6-8605-c9598503e4b2" manual="true">
-        <element uuid="0ff1feb6-a9ab-483c-925e-97c9bb9e24f1" manual="true">
+      <element uuid="d4b72a47-1716-4ce2-948d-8c7d6a668955" manual="true">
+        <element uuid="e42be013-326b-476c-8662-907b8fef36ab" manual="true">
           <bo>
             <seg>pvg</seg>
             <seg>communication_properties::timing</seg>
@@ -370,6 +379,11 @@
           <seg>connection</seg>
           <seg>c12</seg>
         </bo>
+        <bendpoints>
+          <point x="1250.0" y="182.0"/>
+          <point x="1250.0" y="804.0"/>
+          <point x="840.0" y="804.0"/>
+        </bendpoints>
       </element>
       <element uuid="27345ac6-cafb-46bb-83fa-e34fdec8ee50" manual="true">
         <element uuid="40562167-0114-4a74-9e3d-80f8ba30f6c1" manual="true">
@@ -474,8 +488,8 @@
           <point x="760.0" y="370.0"/>
         </bendpoints>
       </element>
-      <element uuid="5edcf13d-d4af-4774-b305-f78b646150b6" manual="true">
-        <element uuid="1e770445-58a0-4bc1-97c2-83822d259e46" manual="true">
+      <element uuid="cf7d75d0-332d-4d06-b25e-5cd4ddd4a347" manual="true">
+        <element uuid="78e1880f-a21f-4306-88b2-79d6534bfe10" manual="true">
           <bo>
             <seg>pvg</seg>
             <seg>communication_properties::timing</seg>
@@ -485,6 +499,10 @@
           <seg>connection</seg>
           <seg>c4</seg>
         </bo>
+        <bendpoints>
+          <point x="768.0" y="110.0"/>
+          <point x="768.0" y="182.0"/>
+        </bendpoints>
       </element>
       <element uuid="adcaf5ca-a8f4-4656-b595-9069d7b9f5ca" manual="true">
         <element uuid="3b356903-48a7-47ea-ad63-ea71784751a0" manual="true">
@@ -500,21 +518,6 @@
         <bendpoints>
           <point x="1270.0" y="378.0"/>
           <point x="1270.0" y="232.0"/>
-        </bendpoints>
-      </element>
-      <element uuid="cc6814b4-4101-4cd4-8dbf-0aad6e08f945" manual="true">
-        <element uuid="bcb061f5-2b0f-472c-ba61-b4dcb62946a9" manual="true">
-          <bo>
-            <seg>pvg</seg>
-            <seg>communication_properties::timing</seg>
-          </bo>
-        </element>
-        <bo>
-          <seg>connection</seg>
-          <seg>c7</seg>
-        </bo>
-        <bendpoints>
-          <point x="1250.0" y="964.0"/>
         </bendpoints>
       </element>
       <element uuid="9fd69d57-1b98-4355-bb02-e532de51d5f7" manual="true">
@@ -577,14 +580,14 @@
           <seg>feature</seg>
           <seg>location_out</seg>
         </bo>
-        <position x="568.0" y="145.0"/>
+        <position x="575.0" y="145.0"/>
       </element>
       <element uuid="0cef779c-e0db-4d4a-98bc-e7dd06bc7913" manual="true" dockArea="right">
         <bo>
           <seg>feature</seg>
           <seg>new_target</seg>
         </bo>
-        <position x="578.0" y="22.0"/>
+        <position x="580.0" y="22.0"/>
       </element>
       <element uuid="d814b87b-e954-44b4-9a0c-926f49f3edab" manual="true" dockArea="left">
         <bo>
@@ -600,13 +603,6 @@
         </bo>
         <position y="623.0"/>
       </element>
-      <element uuid="4ccb5763-a130-44f2-9595-20ea37a4dd53" manual="true" dockArea="right">
-        <bo>
-          <seg>feature</seg>
-          <seg>status_change</seg>
-        </bo>
-        <position x="556.0" y="190.0"/>
-      </element>
       <element uuid="2a0a4a42-bdfc-49d6-87b1-338d5574614f" manual="true" dockArea="left">
         <bo>
           <seg>feature</seg>
@@ -615,6 +611,13 @@
         <position y="112.0"/>
       </element>
       <element uuid="ac1d6bf7-3d7d-4d02-9fff-6d9b4a1d5c40" manual="true">
+        <element uuid="bc5c81dc-224d-4902-b029-3842b58137cc" manual="true" dockArea="left">
+          <bo>
+            <seg>feature</seg>
+            <seg>blockade_in</seg>
+          </bo>
+          <position y="40.0"/>
+        </element>
         <element uuid="26e1f173-221e-48be-af0b-8eebe551aa77" manual="true" dockArea="left">
           <bo>
             <seg>feature</seg>
@@ -648,7 +651,7 @@
             <seg>feature</seg>
             <seg>rotor_power_out</seg>
           </bo>
-          <position x="220.0" y="206.0"/>
+          <position x="226.0" y="206.0"/>
         </element>
         <element uuid="f511f8df-d150-44b1-8951-be36ee3c82cf" manual="true" dockArea="left">
           <bo>
@@ -677,7 +680,7 @@
             <seg>feature</seg>
             <seg>location_out</seg>
           </bo>
-          <position x="206.0" y="28.0"/>
+          <position x="213.0" y="28.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>
@@ -699,7 +702,7 @@
             <seg>feature</seg>
             <seg>height_out</seg>
           </bo>
-          <position x="211.0" y="30.0"/>
+          <position x="217.0" y="30.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>
@@ -709,6 +712,20 @@
         <size width="295.0" height="81.0"/>
       </element>
       <element uuid="870a9956-dcc0-400b-b4d7-332449fe6406" manual="true">
+        <element uuid="71ebcc43-5f8e-4e09-afe5-73eba35b027a" manual="true" dockArea="left">
+          <bo>
+            <seg>feature</seg>
+            <seg>blockade_in</seg>
+          </bo>
+          <position y="23.0"/>
+        </element>
+        <element uuid="32a5c3d5-6d7d-4df7-b257-5a28ff7dc8fc" manual="true" dockArea="right">
+          <bo>
+            <seg>feature</seg>
+            <seg>blockade_out</seg>
+          </bo>
+          <position x="230.0" y="23.0"/>
+        </element>
         <bo>
           <seg>subcomponent</seg>
           <seg>thread_radar</seg>
@@ -729,7 +746,7 @@
             <seg>feature</seg>
             <seg>rotor_power_out</seg>
           </bo>
-          <position x="200.0" y="34.0"/>
+          <position x="206.0" y="34.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>
@@ -751,7 +768,7 @@
             <seg>feature</seg>
             <seg>new_target_out</seg>
           </bo>
-          <position x="171.0" y="20.0"/>
+          <position x="175.0" y="20.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>
@@ -773,7 +790,7 @@
             <seg>feature</seg>
             <seg>weight_out</seg>
           </bo>
-          <position x="218.0" y="30.0"/>
+          <position x="223.0" y="30.0"/>
         </element>
         <bo>
           <seg>subcomponent</seg>
@@ -802,14 +819,14 @@
           <seg>feature</seg>
           <seg>rotor_power_in</seg>
         </bo>
-        <position x="254.0" y="20.0"/>
+        <position x="260.0" y="20.0"/>
       </element>
       <element uuid="2fd1d8df-bcef-420e-9a16-c2a3dd1a8dce" manual="true" dockArea="right">
         <bo>
           <seg>feature</seg>
           <seg>rotor_power_out</seg>
         </bo>
-        <position x="246.0" y="65.0"/>
+        <position x="252.0" y="65.0"/>
       </element>
       <bo>
         <seg>subcomponent</seg>
@@ -831,7 +848,7 @@
           <seg>feature</seg>
           <seg>location_out</seg>
         </bo>
-        <position x="190.0"/>
+        <position x="197.0"/>
       </element>
       <bo>
         <seg>subcomponent</seg>
@@ -853,7 +870,7 @@
           <seg>feature</seg>
           <seg>height</seg>
         </bo>
-        <position x="289.0" y="10.0"/>
+        <position x="293.0" y="10.0"/>
       </element>
       <bo>
         <seg>subcomponent</seg>
@@ -883,7 +900,7 @@
           <seg>feature</seg>
           <seg>blockade</seg>
         </bo>
-        <position x="218.0" y="10.0"/>
+        <position x="222.0" y="10.0"/>
       </element>
       <element uuid="61adfff9-cd11-40f6-8eef-71c6b3a6147d" manual="true" dockArea="left">
         <bo>
@@ -927,7 +944,7 @@
           <seg>feature</seg>
           <seg>weight</seg>
         </bo>
-        <position x="290.0" y="10.0"/>
+        <position x="293.0" y="10.0"/>
       </element>
       <bo>
         <seg>subcomponent</seg>
