@@ -8,10 +8,10 @@ operatora, zawraca i wraca do punktu A bez dostarczania przesyłki (np. w przypa
 
 ### Model AADL
 
-#### Drone Implementation
-
-![Screenshot](https://github.com/jserweta/DroneSystem/blob/master/drone_structure_diagram.png)
-
-#### Operator Implementation and connections with Drone
+#### Operator - główny system
 
 ![Screenshot](https://github.com/jserweta/DroneSystem/blob/master/operator_diagram.png)
+
+#### Drone - podsystem operatora
+
+![Screenshot](https://github.com/jserweta/DroneSystem/blob/master/drone_structure_diagram.png)
